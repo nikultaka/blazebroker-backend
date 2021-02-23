@@ -4,8 +4,9 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
     {
       // Attributes
       id: {
-        type: DataTypes.UUID,
-        defaultValue: Sequelize.UUIDV4,
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
         primaryKey: true
       },
       username: {

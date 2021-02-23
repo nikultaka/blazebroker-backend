@@ -7,14 +7,35 @@ const upload = multer({ dest: 'uploads/' })
 const User = db.user;
 const Role = db.role;
 const Op = db.Op;
+const nodemailer = require("nodemailer");
 
-exports.signup = (req, res) => {
+
+async function sendemail(email,subject,text) {
+  console.log("sendmail");
+  let transporter = await nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true, // true for 465, false for other ports
+    auth: {
+      user: 'palladiumhub17@gmail.com', 
+      pass: 'Admin@123',
+    },
+  });
+  
+  let info = await transporter.sendMail({
+    from: '"Nikul Panchal 👻" <palladiumhub17@gmail.com>', 
+    to: email, 
+    subject: subject, 
+    text: text, 
+    html: text, 
+  });
+  console.log("Message sent: %s", info.messageId);
+  console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+}
+
+exports.signup = async(req, res) => {
   // Save user to database
-
-  console.log(req.body);
-
   User.create({
-    //username: req.body.username,
     email: req.body.email,
     name: req.body.name,
     contact: req.body.contact,
@@ -34,13 +55,15 @@ exports.signup = (req, res) => {
           }
         }).then(roles => {
           user.setRoles(roles).then(() => {
-            res.send({ message: "User was registered successfully!" });
+            sendemail(req.body.email,"Welcome Blazebroker","You have successfully registered");
+            res.send({ status: 1,message: "User was registered successfully!" });
           });
         });
       } else {
         // User role 1
         user.setRoles([1]).then(() => {
-          res.send({ message: "User was registered successfully!" });
+          sendemail(req.body.email,"Welcome Blazebroker","You have successfully registered");
+          res.send({ status: 1,message: "User was registered successfully!" });
         });
       }
     })
@@ -57,7 +80,7 @@ exports.signin = (req, res) => {
   })
     .then(user => {
       if (!user) {
-        return res.status(404).send({ message: "User Not found." });
+        return res.status(404).send({ status: 0,message: "User Not found." });
       }
 
       let passwordIsValid = bcrypt.compareSync(
@@ -67,6 +90,7 @@ exports.signin = (req, res) => {
 
       if (!passwordIsValid) {
         return res.status(401).send({
+          status: 0,
           accessToken: null,
           message: "Invalid Password!"
         });
@@ -83,8 +107,10 @@ exports.signin = (req, res) => {
         }
 
         res.status(200).send({
+          status: 1,
           id: user.id,
           username: user.username,
+          name: user.name,
           email: user.email,
           roles: authorities,
           accessToken: token
@@ -98,7 +124,7 @@ exports.signin = (req, res) => {
 
 
 exports.resetpassword = (req, res) => {
-  // Save user to database
+  
   console.log(req.body);
   const userID = req.userId;
   User.update({
@@ -113,7 +139,7 @@ exports.resetpassword = (req, res) => {
 };
 
 exports.basicupdate = (req, res) => {
-  // Save user to database
+  
   console.log(req.body);
   const userID = req.userId;
   User.update({
@@ -132,4 +158,44 @@ exports.basicupdate = (req, res) => {
     .catch(err => {
       res.status(500).send({ message: err.message });
     });
+};
+
+exports.uploaddocument = (req, res) => {
+  
+  const email = req.body.email;
+  let filename = req.files.signupdocument.name;
+  filename = filename.split(" ").join("_");
+  req.files.signupdocument.mv('./uploads/'+filename, function(err, result) {
+      if(err) 
+        throw err;
+      User.update({
+        document: filename
+      },{where: { email: email }})
+      res.send({
+        status : 1,  
+        success: true,
+        message: "document uploaded successfully!"
+      });
+   });
+  
+};
+
+
+exports.forgotpassword = (req, res) => {
+  const email = req.body.email;
+  User.findOne({
+    where: {
+      email: email
+    }
+  }).then(user => {
+      if(user) {
+        const encodedEmail = Buffer.from(email).toString('base64');
+        sendemail(req.body.email,"Forgot Password - Blazebroker","Please click <a href='http://localhost/resetpassword/?id="+encodedEmail+"'>here</a> to reset password");
+        res.send({ status : 1,message: "Reset password link sent successfully!"});
+      } else {
+        res.send({ status : 0,message: "Email not found"});
+      }
+  });
+
+  
 };
