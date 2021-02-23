@@ -14,5 +14,7 @@ module.exports = app => {
 
   router.delete("/:id",[authJwt.verifyToken], productController.delete);
 
+  router.post("/image",[authJwt.verifyToken], productController.uploaddimage);
+
   app.use("/api/products", router);
 };
