@@ -55,19 +55,15 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single Book with an id
 exports.findOne = (req, res) => {
-  const userID = req.userId;
   const id = req.params.id;
 
-  Book.findByPk(id)
+  Product.findByPk(id)
     .then(data => {
-      res.send(data);
+      res.send({status:1,data:data});
     })
     .catch(err => {
-      res.status(500).send({
-        message: `Error retrieving Book with id = ${id}`
-      });
+        res.send({status:0,data:[]});
     });
 };
 

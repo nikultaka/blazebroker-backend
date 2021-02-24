@@ -38,6 +38,8 @@ require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
 require("./app/routes/product.routes")(app);
 
+
+
 // set port, listen for requests
 const PORT = config.PORT;
 app.listen(PORT, () => {
