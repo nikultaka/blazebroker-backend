@@ -6,6 +6,7 @@ const fileupload = require('express-fileupload');
 
 const app = express();
 
+
 const corsOptions = {
   origin: "http://localhost:3000"
 };
@@ -19,6 +20,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(fileupload());
+
+app.use(express.static(__dirname + '/uploads'));
+app.use(express.static(__dirname + '/uploads/product'));
 
 // database
 const db = require("./app/models");

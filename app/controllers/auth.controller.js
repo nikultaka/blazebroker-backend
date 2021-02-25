@@ -159,7 +159,18 @@ exports.basicupdate = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+exports.user = (req,res) => {
+  const id = req.userId;
+  
 
+  User.findByPk(id)
+    .then(data => {
+      res.send({status:1,data:data});
+    })
+    .catch(err => {
+        res.send({status:0,data:[]});
+    });
+}
 exports.uploaddocument = (req, res) => {
   
   const email = req.body.email;
