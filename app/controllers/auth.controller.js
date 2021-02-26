@@ -131,7 +131,11 @@ exports.resetpassword = (req, res) => {
     password: bcrypt.hashSync(req.body.password, 8)
   },{where: { id: userID }})
     .then(user => {
-        res.send({ message: "password reset successfully!",userID:userID });
+        if(user) {
+          res.send({ status : 1,message: "password reset successfully!"});
+        } else {
+          res.send({ status : 0,message: "User not found"});
+        }
     })
     .catch(err => {
       res.status(500).send({ message: err.message });
@@ -153,7 +157,7 @@ exports.basicupdate = (req, res) => {
     area: req.body.area,
   },{where: { id: userID }})
     .then(user => {
-        res.send({ message: "basic information updated successfully!",userID:userID });
+        res.send({ status : 1,message: "basic information updated successfully!" });
     })
     .catch(err => {
       res.status(500).send({ message: err.message });
