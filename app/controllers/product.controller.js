@@ -39,13 +39,14 @@ exports.create = (req, res) => {
 
 // Retrieve all Books from the database.
 exports.findAll = (req, res) => {
+  console.log("test 123");
   const title = req.query.name;
-  var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
-  const userID = req.userId;
+  console.log(title);
+  var condition = title ? { name: { [Op.like]: `%${title}%` } } : null;
 
   Product.findAll({ where: condition })
     .then(data => {
-      const response = {status: 1,data:data,userID:userID}
+      const response = {status: 1,data:data}
       res.send(response);
     })
     .catch(err => {

@@ -8,6 +8,8 @@ module.exports = app => {
 
   router.get("/", productController.findAll); //,[authJwt.verifyToken]
 
+  //router.get("/:name", productController.search);
+
   router.get("/:id", productController.findOne); //,[authJwt.verifyToken]
 
   router.put("/:id",[authJwt.verifyToken], productController.update);
