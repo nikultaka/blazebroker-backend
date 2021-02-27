@@ -6,9 +6,9 @@ module.exports = app => {
 
   router.post("/",[authJwt.verifyToken], productController.create);
 
-  router.get("/",[authJwt.verifyToken], productController.findAll);
+  router.get("/", productController.findAll); //,[authJwt.verifyToken]
 
-  router.get("/:id",[authJwt.verifyToken], productController.findOne);
+  router.get("/:id", productController.findOne); //,[authJwt.verifyToken]
 
   router.put("/:id",[authJwt.verifyToken], productController.update);
 

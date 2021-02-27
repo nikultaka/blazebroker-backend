@@ -27,5 +27,6 @@ module.exports = function(app) {
   app.get("/api/auth/user",[authJwt.verifyToken],controller.user);
   app.post("/api/auth/uploaddocument",controller.uploaddocument);
   app.post("/api/auth/forgotpassword",controller.forgotpassword);
+  app.post("/api/auth/resetpassword-frontend",controller.resetpasswordfrontend);
   
 };

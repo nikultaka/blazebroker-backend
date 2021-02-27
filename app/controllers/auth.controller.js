@@ -142,6 +142,27 @@ exports.resetpassword = (req, res) => {
     });
 };
 
+exports.resetpasswordfrontend = (req, res) => {
+  
+  console.log(req.body);
+  const email = req.body.email;
+  User.update({    
+    password: bcrypt.hashSync(req.body.password, 8)
+  },{where: { email: email }})
+    .then(user => {
+        if(user) {
+          res.send({ status : 1,message: "password reset successfully!"});
+        } else {
+          res.send({ status : 0,message: "User not found"});
+        }
+    })
+    .catch(err => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
+
+
 exports.basicupdate = (req, res) => {
   
   console.log(req.body);
