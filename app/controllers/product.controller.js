@@ -39,12 +39,21 @@ exports.create = (req, res) => {
 
 // Retrieve all Books from the database.
 exports.findAll = (req, res) => {
-  console.log("test 123");
   const title = req.query.name;
-  console.log(title);
+  let page = 0;
+  let limit = 18;
+  if(typeof req.query.page !=undefined && req.query.page!=null && req.query.page!='undefined') {
+    page = req.query.page;
+  }
+  console.log("page:"+page);
+  let offset = 0;
+  if(page !=0) {
+    offset = limit*page;
+  }
+  console.log(page);    
   var condition = title ? { name: { [Op.like]: `%${title}%` } } : null;
 
-  Product.findAll({ where: condition })
+  Product.findAll({ where: condition,offset: offset, limit: limit, })
     .then(data => {
       const response = {status: 1,data:data}
       res.send(response);
