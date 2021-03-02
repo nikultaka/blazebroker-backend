@@ -53,15 +53,14 @@ exports.findAll = (req, res) => {
   console.log(page);    
   var condition = title ? { name: { [Op.like]: `%${title}%` } } : null;
 
-  Product.findAll({ where: condition,offset: offset, limit: limit, })
+  Product.findAndCountAll({ where: condition,offset: offset, limit: limit, })
     .then(data => {
-      const response = {status: 1,data:data}
+      //console.log(data);
+      const response = {status: 1,data:data.rows,total:data.count}
       res.send(response);
     })
     .catch(err => {
-      res.send(500).send({
-        message: err.message || "Some error accurred while retrieving products."
-      });
+      res.send({status:0,data:[]});
     });
 };
 
