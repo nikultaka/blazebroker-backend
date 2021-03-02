@@ -19,6 +19,12 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
       },
       total: {
         type: DataTypes.STRING
+      },
+      transaction_id: {
+        type: DataTypes.STRING
+      },
+      transaction_response: {
+        type: DataTypes.TEXT
       }
     },
     { 

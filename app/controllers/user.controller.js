@@ -25,13 +25,32 @@ exports.checkout = (req, res) => {
       email: req.body.email,
       mobile: req.body.mobile,
       subtotal: req.body.subtotal,
-      total: req.body.total
+      total: req.body.total,
+      transaction_id: req.body.transaction_id,
+      transaction_response : req.body.transaction_response,
     })
-    .then(user => {
-        res.send({ message: "checkout completed successfully!"});
+    .then(checkout => {
+        console.log("items length");
+        console.log(req.body.items.length);
+        if(req.body.items.length > 0) {
+            for(var n=0; n<req.body.items.length; n++) {
+              Item.create({
+                checkout_id: checkout.id,
+                product_id: req.body.items[n].product_id,
+                qty: req.body.items[n].qty
+              })
+              .then(user => {
+                
+              })
+              .catch(err => {
+                res.send({ status : 0,message: "something went wrong"});
+              });
+            }
+        }
+        res.send({ status : 1,message: "checkout completed successfully!",id:checkout.id});
     })
     .catch(err => {
-      res.status(500).send({ message: err.message });
+      res.send({ status : 0,message: "something went wrong"});
     });
 };
 
