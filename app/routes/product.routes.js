@@ -7,6 +7,9 @@ module.exports = app => {
   router.post("/",[authJwt.verifyToken], productController.create);
 
   router.get("/", productController.findAll); //,[authJwt.verifyToken]
+  router.get("/seller",[authJwt.verifyToken], productController.findAllSeller); //
+
+  router.get("/orderlist", [authJwt.verifyToken], productController.orderlist);
 
   //router.get("/:name", productController.search);
 
