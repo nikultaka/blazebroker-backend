@@ -221,9 +221,8 @@ exports.orderlist = async (req, res) => {
 
 exports.orderconfirm = (req, res) => {
   const id = req.body.id;
-  const checkout_id = req.body.checkout_id;
   Item.update({is_confirm:1}, {
-    where: { id: id,checkout_id:checkout_id }
+    where: { id: id}
   })
     .then(num => {
       if (num == 1) {
