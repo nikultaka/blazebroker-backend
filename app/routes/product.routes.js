@@ -10,6 +10,8 @@ module.exports = app => {
   router.get("/seller",[authJwt.verifyToken], productController.findAllSeller); //
 
   router.get("/orderlist", [authJwt.verifyToken], productController.orderlist);
+  router.post("/orderconfirm", [authJwt.verifyToken], productController.orderconfirm);
+  
 
   //router.get("/:name", productController.search);
 

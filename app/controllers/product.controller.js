@@ -1,5 +1,6 @@
 const db = require("../models");
 const Product = db.products;
+const Item = db.items;
 const Op = db.Op;
 const Checkout = db.checkouts;
 const { Sequelize } = require("sequelize");
@@ -215,6 +216,32 @@ exports.orderlist = async (req, res) => {
     console.log(rows);
     res.json({ status : 1 ,data : rows});    
   });
+};
 
 
+exports.orderconfirm = (req, res) => {
+  const id = req.body.id;
+  const checkout_id = req.body.checkout_id;
+  Item.update({is_confirm:1}, {
+    where: { id: id,checkout_id:checkout_id }
+  })
+    .then(num => {
+      if (num == 1) {
+        res.send({
+          status : 1,
+          message: "Order confirmed successfully."
+        });
+      } else {
+        res.send({
+          status : 0,
+          message: `Cannot update order`
+        });
+      }
+    })
+    .catch(err => {
+      res.send({
+        status : 0,
+        message: "Error updating order with id=" + id
+      });
+    });
 };

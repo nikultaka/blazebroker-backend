@@ -16,6 +16,9 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
       },
       qty: {
         type: DataTypes.INTEGER
+      },
+      is_confirm: {
+        type: DataTypes.INTEGER
       }
     },
     { 
