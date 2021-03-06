@@ -226,7 +226,7 @@ exports.forgotpassword = (req, res) => {
   }).then(user => {
       if(user) {
         const encodedEmail = Buffer.from(email).toString('base64');
-        sendemail(req.body.email,"Forgot Password - Blazebroker","Please click <a href='http://localhost/resetpassword/?id="+encodedEmail+"'>here</a> to reset password");
+        sendemail(req.body.email,"Forgot Password - Blazebroker","Please click <a href='"+config.SITE_URL+"/change-password/?id="+encodedEmail+"'>here</a> to reset password");
         res.send({ status : 1,message: "Reset password link sent successfully!"});
       } else {
         res.send({ status : 0,message: "Email not found"});
