@@ -88,7 +88,16 @@ exports.findAll = (req, res) => {
       res.send({status:0,data:[]});
     });
 };
+exports.getAll = async (req, res)=>{
+  var query  = 'select p.*,u.name as seller_name,u.company_name as company_name from  products  as p left join  users as u on p.seller_id = u.id ';
+  
+  await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
+    res.json({ status : 1 ,data : rows});    
+  }).catch(err => {
+    res.send({status:0,data:[]});
+  });
 
+}
 exports.findAllSeller = (req, res) => {
   const title = req.query.name;
   const user_id = req.userId;
@@ -211,9 +220,8 @@ exports.uploadimage = (req, res) => {
 exports.orderlist = async (req, res) => {
   const user_id = req.userId;
   var query  = 'select distinct c.id as order_id,i.id as item_id,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id where p.seller_id ='+user_id+' ';
-  console.log(query);
+  
   await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
-    console.log(rows);
     res.json({ status : 1 ,data : rows});    
   });
 };
@@ -242,5 +250,18 @@ exports.orderconfirm = (req, res) => {
         status : 0,
         message: "Error updating order with id=" + id
       });
+    });
+};
+exports.changestatus = (req, res) => {
+  
+  const productsID = req.body.id;
+  Product.update({
+    status: req.body.status,
+  },{where: { id: productsID }})
+    .then(user => {
+        res.send({ status : 1,message: "Status updated successfully!" });
+    })
+    .catch(err => {
+      res.status(500).send({ message: err.message });
     });
 };

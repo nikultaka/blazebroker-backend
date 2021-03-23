@@ -8,6 +8,26 @@ const User = db.user;
 const Role = db.role;
 const Op = db.Op;
 const nodemailer = require("nodemailer");
+const { Sequelize } = require("sequelize");
+
+
+const sequelize = new Sequelize(
+  config.db.DB_NAME,
+  config.db.DB_USER,
+  config.db.DB_PASS,
+  {
+    host: config.db.DB_HOST,
+    dialect: config.db.dialect,
+    operatorsAliases: false,
+
+    poll: {
+      max: config.db.pool.max,
+      min: config.db.pool.min,
+      acquire: config.db.pool.acquire,
+      idle: config.db.pool.idle
+    }
+  }
+);
 
 
 async function sendemail(email,subject,text) {
@@ -75,7 +95,8 @@ exports.signup = async(req, res) => {
 exports.signin = (req, res) => {
   User.findOne({
     where: {
-      email: req.body.email
+      email: req.body.email,
+      status : 1
     }
   })
     .then(user => {
@@ -97,7 +118,7 @@ exports.signin = (req, res) => {
       }
 
       let token = jwt.sign({ id: user.id }, config.auth.secret, {
-        expiresIn: 86400 // 24 hours
+        expiresIn: 864000 // 24 hours
       });
 
       let authorities = [];
@@ -112,7 +133,7 @@ exports.signin = (req, res) => {
           username: user.username,
           name: user.name,
           email: user.email,
-          roles: authorities,
+          roles: authorities[0],
           accessToken: token
         });
       });
@@ -234,4 +255,95 @@ exports.forgotpassword = (req, res) => {
   });
 
   
+};
+exports.userlist = async(req,res) => {
+  var query  = 'select u.id,u.username,u.email,u.name,u.contact,u.title,u.company_name,u.zip,u.document,u.phone,u.address,u.province,u.city,u.area,u.shop_name,u.status,u.created_at,u.updated_at from  users  as u left join user_roles as ur on u.id = ur.user_id where ur.role_id = 1';
+  
+  await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
+    res.json({ status : 1 ,data : rows});    
+  }).catch(err => {
+    res.send({status:0,data:[]});
+  });
+  
+};
+
+exports.sellerupdate = (req, res) => {
+  
+  const userID = req.body.id;
+  User.update({
+    name: req.body.name,
+    contact: req.body.contact,
+    shop_name: req.body.shop_name,
+    phone: req.body.phone,
+    address: req.body.address,
+    province: req.body.province,
+    city: req.body.city,
+    area: req.body.area,
+  },{where: { id: userID }})
+    .then(user => {
+        res.send({ status : 1,message: "Basic information updated successfully!" });
+    })
+    .catch(err => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
+exports.delete = (req, res) => {
+  const id = req.params.id;
+
+  User.destroy({
+    where: { id: id }
+  })
+    .then(num => {
+      if (num == 1) {
+        res.send({
+          status : 1,
+          message: "Seller was deleted successfully!"
+        });
+      } else {
+        res.send({
+          status : 0,
+          message: `Cannot delete Seller with id=${id}. Maybe Seller was not found!`
+        });
+      }
+    })
+    .catch(err => {
+      res.send({
+        status : 0,
+        message: "Could not delete Seller with id=" + id
+      });
+    });
+};
+
+exports.changestatus = (req, res) => {
+  
+  const userID = req.body.id;
+  User.update({
+    status: req.body.status,
+  },{where: { id: userID }})
+    .then(user => {
+        res.send({ status : 1,message: "Status updated successfully!" });
+    })
+    .catch(err => {
+      res.status(500).send({ message: err.message });
+    });
+};
+exports.changepassword = (req, res) => {
+  
+  
+  const userID = req.body.id;
+  
+  User.update({
+    password: bcrypt.hashSync(req.body.password, 8)
+  },{where: { id: userID }})
+    .then(user => {
+        if(user) {
+          res.send({ status : 1,message: "password reset successfully!"});
+        } else {
+          res.send({ status : 0,message: "User not found"});
+        }
+    })
+    .catch(err => {
+      res.status(500).send({ message: err.message });
+    });
 };

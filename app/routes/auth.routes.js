@@ -21,6 +21,14 @@ module.exports = function(app) {
     controller.signup
   );
 
+  /********* Admin Section API */
+  app.get("/api/auth/userlist", controller.userlist);
+  app.put("/api/auth/sellerupdate",[authJwt.verifyToken],controller.sellerupdate);
+  app.delete("/api/auth/delete/:id",[authJwt.verifyToken], controller.delete);
+  app.put("/api/auth/changestatus",[authJwt.verifyToken],controller.changestatus);
+  app.post("/api/auth/changepassword",[authJwt.verifyToken],controller.changepassword);
+/********* End Admin Section API */
+
   app.post("/api/auth/signin", controller.signin);
   app.post("/api/auth/resetpassword",[authJwt.verifyToken],controller.resetpassword);
   app.post("/api/auth/basicupdate",[authJwt.verifyToken],controller.basicupdate);

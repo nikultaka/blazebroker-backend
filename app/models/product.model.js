@@ -33,6 +33,10 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
       stock: {
         type: DataTypes.INTEGER
       },
+      status:{
+        type: DataTypes.TINYINT,
+        default : 1
+      },
       created_at: {
         allowNull: false,
         type: DataTypes.DATE

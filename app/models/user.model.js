@@ -54,6 +54,10 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
       },
       shop_name: {
         type: DataTypes.STRING
+      },
+      status:{
+        type: DataTypes.TINYINT,
+        default : 1
       }  
     },
     {    

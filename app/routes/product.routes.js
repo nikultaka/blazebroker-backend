@@ -4,9 +4,14 @@ module.exports = app => {
 
   const router = require("express").Router();
 
+/********* Admin Section API */
+  router.put("/changestatus",[authJwt.verifyToken],productController.changestatus);
+/*********End Admin Section API */
+
   router.post("/",[authJwt.verifyToken], productController.create);
 
   router.get("/", productController.findAll); //,[authJwt.verifyToken]
+  router.get("/all", productController.getAll); //,[authJwt.verifyToken]
   router.get("/seller",[authJwt.verifyToken], productController.findAllSeller); //
 
   router.get("/orderlist", [authJwt.verifyToken], productController.orderlist);
