@@ -265,3 +265,12 @@ exports.changestatus = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.allorderlist = async (req, res) => {
+  
+  var query  = 'select distinct c.id as order_id,u.name as seller_name,i.id as item_id,i.qty as qty,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id  left join users as u on u.id = p.seller_id';
+  
+  await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
+    res.json({ status : 1 ,data : rows});    
+  });
+};

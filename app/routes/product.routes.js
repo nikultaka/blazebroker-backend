@@ -6,6 +6,7 @@ module.exports = app => {
 
 /********* Admin Section API */
   router.put("/changestatus",[authJwt.verifyToken],productController.changestatus);
+  router.get("/allorderlist", [authJwt.verifyToken], productController.allorderlist);
 /*********End Admin Section API */
 
   router.post("/",[authJwt.verifyToken], productController.create);
