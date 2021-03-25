@@ -70,17 +70,17 @@ exports.findAll = (req, res) => {
   if(typeof req.query.page !=undefined && req.query.page!=null && req.query.page!='undefined') {
     page = req.query.page;
   }
-  console.log("page:"+page);
+  
   let offset = 0;
   if(page !=0) {
     offset = limit*page;
   }
-  console.log(page);    
-  var condition = title ? { name: { [Op.like]: `%${title}%` } } : null;
+  
+  var condition = title ? { name: { [Op.like]: `%${title}%` } , status : 1 } : {status:1};
 
   Product.findAndCountAll({ where: condition,offset: offset, limit: limit, })
     .then(data => {
-      //console.log(data);
+      
       const response = {status: 1,data:data.rows,total:data.count}
       res.send(response);
     })
@@ -219,7 +219,7 @@ exports.uploadimage = (req, res) => {
 
 exports.orderlist = async (req, res) => {
   const user_id = req.userId;
-  var query  = 'select distinct c.id as order_id,i.id as item_id,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id where p.seller_id ='+user_id+' ';
+  var query  = 'select distinct c.id as order_id,i.id as item_id,i.qty as qty,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id where p.seller_id ='+user_id+' ';
   
   await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
     res.json({ status : 1 ,data : rows});    
