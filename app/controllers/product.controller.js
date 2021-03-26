@@ -5,7 +5,7 @@ const Op = db.Op;
 const Checkout = db.checkouts;
 const { Sequelize } = require("sequelize");
 const config = require("../config/config.js");
-
+const jwt = require("jsonwebtoken");
 const sequelize = new Sequelize(
   config.db.DB_NAME,
   config.db.DB_USER,
@@ -46,9 +46,9 @@ exports.create = (req, res) => {
     image: req.body.image,
     price: req.body.price,
     stock: req.body.stock,
-  };
+    remaining_stock: req.body.stock,
 
-  console.log(product)
+  };
 
   // Save product in database
   Product.create(product)
@@ -142,10 +142,10 @@ exports.findOne = (req, res) => {
 exports.update = (req, res) => {
   const id = req.params.id;
 
-  Product.update(req.body, {
-    where: { id: id }
-  })
-    .then(num => {
+    Product.update(req.body, {
+      where: { id: id }
+    })
+      .then(num => {
       if (num == 1) {
         res.send({
           status : 1,
@@ -234,10 +234,27 @@ exports.orderconfirm = (req, res) => {
   })
     .then(num => {
       if (num == 1) {
-        res.send({
-          status : 1,
-          message: "Order confirmed successfully."
-        });
+        const product_id =  req.body.product_id;
+        const remaining_stock =  req.body.remaining_stock;
+        Product.update({
+          remaining_stock: remaining_stock
+        }, {
+          where: { id: product_id }
+        })
+          .then(num => {
+            if (num == 1) {
+              res.send({
+                status : 1,
+                message: "Order confirmed successfully."
+              });
+            }
+          }).catch(err => {
+            res.send({
+              status : 0,
+              message: "Error updating order with id=" + id
+            });
+          });
+        
       } else {
         res.send({
           status : 0,
@@ -253,7 +270,14 @@ exports.orderconfirm = (req, res) => {
     });
 };
 exports.changestatus = (req, res) => {
-  
+  const usertoken = req.headers["x-access-token"] || req.headers["Authorization"];
+ const decoded = jwt.verify(usertoken, config.auth.secret);
+  if(decoded.roles != config.role.admin){
+    res.send({
+      status : 0,
+      message: 'You haven`t permission to access.!'
+    });
+  }
   const productsID = req.body.id;
   Product.update({
     status: req.body.status,
@@ -267,7 +291,15 @@ exports.changestatus = (req, res) => {
 };
 
 exports.allorderlist = async (req, res) => {
-  
+  const usertoken = req.headers["x-access-token"] || req.headers["Authorization"];
+ const decoded = jwt.verify(usertoken, config.auth.secret);
+  if(decoded.roles != config.role.admin){
+    res.send({
+      status : 0,
+      message: 'You haven`t permission to access.!',
+      data : []
+    });
+  }
   var query  = 'select distinct c.id as order_id,u.name as seller_name,i.id as item_id,i.qty as qty,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id  left join users as u on u.id = p.seller_id';
   
   await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {

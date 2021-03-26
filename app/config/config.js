@@ -23,5 +23,10 @@ module.exports = {
   /** AUTH KEY */
   auth: {
     secret: "our-secret-key"
+  },
+  role:{
+    user : 'ROLE_USER',
+    admin : 'ROLE_ADMIN',
+    moderator : 'ROLE_MODERATOR'
   }
 };

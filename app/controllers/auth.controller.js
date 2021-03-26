@@ -117,16 +117,16 @@ exports.signin = (req, res) => {
         });
       }
 
-      let token = jwt.sign({ id: user.id }, config.auth.secret, {
-        expiresIn: 864000 // 24 hours
-      });
+      
 
       let authorities = [];
       user.getRoles().then(roles => {
         for (let i = 0; i < roles.length; i++) {
           authorities.push("ROLE_" + roles[i].name.toUpperCase());
         }
-
+        let token = jwt.sign({ id: user.id,roles:authorities[0]}, config.auth.secret, {
+          expiresIn: 864000 // 24 hours
+        });
         res.status(200).send({
           status: 1,
           id: user.id,
@@ -257,6 +257,7 @@ exports.forgotpassword = (req, res) => {
   
 };
 exports.userlist = async(req,res) => {
+   
   var query  = 'select u.id,u.username,u.email,u.name,u.contact,u.title,u.company_name,u.zip,u.document,u.phone,u.address,u.province,u.city,u.area,u.shop_name,u.status,u.created_at,u.updated_at from  users  as u left join user_roles as ur on u.id = ur.user_id where ur.role_id = 1';
   
   await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
@@ -268,7 +269,14 @@ exports.userlist = async(req,res) => {
 };
 
 exports.sellerupdate = (req, res) => {
-  
+  const usertoken = req.headers["x-access-token"] || req.headers["Authorization"];
+ const decoded = jwt.verify(usertoken, config.auth.secret);
+  if(decoded.roles != config.role.admin){
+    res.send({
+      status : 0,
+      message: 'You haven`t permission to access.!'
+    });
+  }
   const userID = req.body.id;
   User.update({
     name: req.body.name,
@@ -289,6 +297,14 @@ exports.sellerupdate = (req, res) => {
 };
 
 exports.delete = (req, res) => {
+  const usertoken = req.headers["x-access-token"] || req.headers["Authorization"];
+ const decoded = jwt.verify(usertoken, config.auth.secret);
+  if(decoded.roles != config.role.admin){
+    res.send({
+      status : 0,
+      message: 'You haven`t permission to access.!'
+    });
+  }
   const id = req.params.id;
 
   User.destroy({
@@ -316,7 +332,14 @@ exports.delete = (req, res) => {
 };
 
 exports.changestatus = (req, res) => {
-  
+  const usertoken = req.headers["x-access-token"] || req.headers["Authorization"];
+ const decoded = jwt.verify(usertoken, config.auth.secret);
+  if(decoded.roles != config.role.admin){
+    res.send({
+      status : 0,
+      message: 'You haven`t permission to access.!'
+    });
+  }
   const userID = req.body.id;
   User.update({
     status: req.body.status,
@@ -329,7 +352,14 @@ exports.changestatus = (req, res) => {
     });
 };
 exports.changepassword = (req, res) => {
-  
+  const usertoken = req.headers["x-access-token"] || req.headers["Authorization"];
+ const decoded = jwt.verify(usertoken, config.auth.secret);
+  if(decoded.roles != config.role.admin){
+    res.send({
+      status : 0,
+      message: 'You haven`t permission to access.!'
+    });
+  }
   
   const userID = req.body.id;
   

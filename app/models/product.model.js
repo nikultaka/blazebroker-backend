@@ -33,6 +33,9 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
       stock: {
         type: DataTypes.INTEGER
       },
+      remaining_stock: {
+        type: DataTypes.INTEGER
+      },
       status:{
         type: DataTypes.TINYINT,
         default : 1
