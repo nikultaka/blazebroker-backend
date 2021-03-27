@@ -96,12 +96,11 @@ exports.signin = (req, res) => {
   User.findOne({
     where: {
       email: req.body.email,
-      status : 1
     }
   })
     .then(user => {
       if (!user) {
-        return res.status(404).send({ status: 0,message: "User Not found." });
+        return res.status(201).send({ status: 0,message: "User Not found." });
       }
 
       let passwordIsValid = bcrypt.compareSync(
@@ -110,14 +109,20 @@ exports.signin = (req, res) => {
       );
 
       if (!passwordIsValid) {
-        return res.status(401).send({
+        return res.status(201).send({
           status: 0,
           accessToken: null,
           message: "Invalid Password!"
         });
       }
 
-      
+      if(user.status != 1){
+        return res.status(201).send({
+          status: 0,
+          accessToken: null,
+          message: "User not active!"
+        });
+      }
 
       let authorities = [];
       user.getRoles().then(roles => {
