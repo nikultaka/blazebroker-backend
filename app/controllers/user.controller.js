@@ -2,6 +2,26 @@ const db = require("../models");
 const Checkout = db.checkouts;
 const Item = db.items;
 const Op = db.Op;
+const { Sequelize } = require("sequelize");
+const config = require("../config/config.js");
+
+const sequelize = new Sequelize(
+  config.db.DB_NAME,
+  config.db.DB_USER,
+  config.db.DB_PASS,
+  {
+    host: config.db.DB_HOST,
+    dialect: config.db.dialect,
+    operatorsAliases: false,
+
+    poll: {
+      max: config.db.pool.max,
+      min: config.db.pool.min,
+      acquire: config.db.pool.acquire,
+      idle: config.db.pool.idle
+    }
+  }
+);
 
 exports.allAccess = (req, res) => {
   res.status(200).send("Public Content.");
@@ -18,7 +38,28 @@ exports.adminBoard = (req, res) => {
 exports.moderatorBoard = (req, res) => {
   res.status(200).send("Moderator Content.");
 };
-
+async function sendemail(email,subject,text) {
+  console.log("sendmail");
+  let transporter = await nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true, // true for 465, false for other ports
+    auth: {
+      user: 'palladiumhub17@gmail.com', 
+      pass: 'Admin@123',
+    },
+  });
+  
+  let info = await transporter.sendMail({
+    from: '"Nikul Panchal 👻" <palladiumhub17@gmail.com>', 
+    to: email, 
+    subject: subject, 
+    text: text, 
+    html: text, 
+  });
+  console.log("Message sent: %s", info.messageId);
+  console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+}
 exports.checkout = (req, res) => {
   console.log(req.body);
     Checkout.create({
@@ -40,7 +81,22 @@ exports.checkout = (req, res) => {
                 qty: req.body.items[n].qty
               })
               .then(user => {
-                
+//                 console.log("items user");
+//                 console.log(user)
+//                 var query  = 'SELECT products.*,users.email FROM `products` left join users on users.id = products.seller_id where products.id = '+req.body.items[n].product_id;
+//                 console.log(query)
+//                 sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
+//                   console.log(rows);
+//                   var order_string = "<p>Product Name  : " + rows.name + "</p>";
+//                       order_string += "<p>Stock : " + rows.remaining_stock + "</p>";
+//                       order_string += "<p>User Email : " + req.body.email + "</p>";
+//                       order_string += "<p>User Mobile : " + req.body.mobile + "</p>";
+//                       order_string += "<p>Transation Id : " + req.body.transaction_id + "</p>";
+//                       order_string += "<p><a>confirm Order</a></p>";
+// console.log(order_string);
+//                     sendemail(rows.email,"New Order",order_string);
+
+//                 });
               })
               .catch(err => {
                 res.send({ status : 0,message: "something went wrong"});
