@@ -81,22 +81,21 @@ exports.checkout = (req, res) => {
                 qty: req.body.items[n].qty
               })
               .then(user => {
-//                 console.log("items user");
-//                 console.log(user)
-//                 var query  = 'SELECT products.*,users.email FROM `products` left join users on users.id = products.seller_id where products.id = '+req.body.items[n].product_id;
-//                 console.log(query)
-//                 sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
-//                   console.log(rows);
-//                   var order_string = "<p>Product Name  : " + rows.name + "</p>";
-//                       order_string += "<p>Stock : " + rows.remaining_stock + "</p>";
-//                       order_string += "<p>User Email : " + req.body.email + "</p>";
-//                       order_string += "<p>User Mobile : " + req.body.mobile + "</p>";
-//                       order_string += "<p>Transation Id : " + req.body.transaction_id + "</p>";
-//                       order_string += "<p><a>confirm Order</a></p>";
-// console.log(order_string);
-//                     sendemail(rows.email,"New Order",order_string);
+                
+                /* var query  = 'SELECT products.*,users.email FROM `products` left join users on users.id = products.seller_id where products.id = '+req.body.items[n].product_id;
+                console.log(query)
+                sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
+                  console.log(rows);
+                  var order_string = "<p>Product Name  : " + rows.name + "</p>";
+                      order_string += "<p>Stock : " + rows.remaining_stock + "</p>";
+                      order_string += "<p>User Email : " + req.body.email + "</p>";
+                      order_string += "<p>User Mobile : " + req.body.mobile + "</p>";
+                      order_string += "<p>Transation Id : " + req.body.transaction_id + "</p>";
+                      order_string += "<p><a>confirm Order</a></p>";
 
-//                 });
+                    sendemail(rows.email,"New Order",order_string);
+
+                }); */
               })
               .catch(err => {
                 res.send({ status : 0,message: "something went wrong"});
