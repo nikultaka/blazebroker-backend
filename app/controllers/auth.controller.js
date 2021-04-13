@@ -33,17 +33,17 @@ const sequelize = new Sequelize(
 async function sendemail(email,subject,text) {
   console.log("sendmail");
   let transporter = await nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: "p3plcpnl0888.prod.phx3.secureserver.net",
     port: 465,
     secure: true, // true for 465, false for other ports
     auth: {
-      user: 'palladiumhub17@gmail.com', 
-      pass: 'Admin@123',
+      user: 'nikul@palladiumhub.com', 
+      pass: 'Testing@123',
     },
   });
   
   let info = await transporter.sendMail({
-    from: '"Nikul Panchal 👻" <palladiumhub17@gmail.com>', 
+    from: '"Nikul Panchal 👻" <nikul@palladiumhub.com>', 
     to: email, 
     subject: subject, 
     text: text, 
