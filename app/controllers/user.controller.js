@@ -4,6 +4,7 @@ const Item = db.items;
 const Op = db.Op;
 const { Sequelize } = require("sequelize");
 const config = require("../config/config.js");
+const nodemailer = require("nodemailer");
 
 const sequelize = new Sequelize(
   config.db.DB_NAME,
@@ -49,6 +50,11 @@ async function sendemail(email,subject,text) {
       pass: 'Admin@123',
     },
   });
+
+  console.log("transporter");
+  console.log(email);
+  console.log(subject);
+  console.log(text);
   
   let info = await transporter.sendMail({
     from: '"Nikul Panchal 👻" <palladiumhub17@gmail.com>', 
@@ -57,10 +63,11 @@ async function sendemail(email,subject,text) {
     text: text, 
     html: text, 
   });
+  console.log(info);
   console.log("Message sent: %s", info.messageId);
   console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 }
-exports.checkout = (req, res) => {
+exports.checkout = async (req, res) => {
   console.log(req.body);
     Checkout.create({
       email: req.body.email,
@@ -75,17 +82,20 @@ exports.checkout = (req, res) => {
         console.log(req.body.items.length);
         if(req.body.items.length > 0) {
             for(var n=0; n<req.body.items.length; n++) {
+              var productID  = req.body.items[n].product_id;
               Item.create({
                 checkout_id: checkout.id,
                 product_id: req.body.items[n].product_id,
                 qty: req.body.items[n].qty
               })
-              .then(user => {
+              .then(async user => {
                 
-                /* var query  = 'SELECT products.*,users.email FROM `products` left join users on users.id = products.seller_id where products.id = '+req.body.items[n].product_id;
+                //console.log(user);
+                //console.log(productID);
+                var query  = 'SELECT products.*,users.email FROM `products` left join users on users.id = products.seller_id where products.id = '+productID;
                 console.log(query)
-                sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
-                  console.log(rows);
+                await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(async function(rows) {
+                  console.log(rows);  
                   var order_string = "<p>Product Name  : " + rows.name + "</p>";
                       order_string += "<p>Stock : " + rows.remaining_stock + "</p>";
                       order_string += "<p>User Email : " + req.body.email + "</p>";
@@ -93,9 +103,8 @@ exports.checkout = (req, res) => {
                       order_string += "<p>Transation Id : " + req.body.transaction_id + "</p>";
                       order_string += "<p><a>confirm Order</a></p>";
 
-                    sendemail(rows.email,"New Order",order_string);
-
-                }); */
+                    await sendemail(rows.email,"New Order",order_string);
+                });
               })
               .catch(err => {
                 res.send({ status : 0,message: "something went wrong"});
@@ -103,8 +112,10 @@ exports.checkout = (req, res) => {
             }
         }
         res.send({ status : 1,message: "checkout completed successfully!",id:checkout.id});
-    })
+    }).bind(productID)
     .catch(err => {
+      console.log("err");
+      console.log(err);
       res.send({ status : 0,message: "something went wrong"});
     });
 };
