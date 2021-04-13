@@ -88,22 +88,24 @@ exports.checkout = async (req, res) => {
                 product_id: req.body.items[n].product_id,
                 qty: req.body.items[n].qty
               })
-              .then(async user => {
+              .then(async item => {
                 
                 //console.log(user);
                 //console.log(productID);
                 var query  = 'SELECT products.*,users.email FROM `products` left join users on users.id = products.seller_id where products.id = '+productID;
-                console.log(query)
+                
                 await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(async function(rows) {
-                  console.log(rows);  
-                  var order_string = "<p>Product Name  : " + rows.name + "</p>";
-                      order_string += "<p>Stock : " + rows.remaining_stock + "</p>";
+                  if(rows[0]){
+                    var order_string = "<p>Product Name  : " + rows[0].name + "</p>";
+                      order_string += "<p>Stock : " + rows[0].remaining_stock + "</p>";
                       order_string += "<p>User Email : " + req.body.email + "</p>";
                       order_string += "<p>User Mobile : " + req.body.mobile + "</p>";
                       order_string += "<p>Transation Id : " + req.body.transaction_id + "</p>";
-                      order_string += "<p><a>confirm Order</a></p>";
+                      order_string += "<p><a href='"+config.SITE_URL+"/order-confirm/"+item.id+"'>confirm Order</a></p>";
 
-                    await sendemail(rows.email,"New Order",order_string);
+                    await sendemail(rows[0].email,"New Order",order_string);
+                  }
+                  
                 });
               })
               .catch(err => {

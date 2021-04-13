@@ -269,6 +269,77 @@ exports.orderconfirm = (req, res) => {
       });
     });
 };
+exports.mailorderconfirm = async(req, res) => {
+  const id = req.body.id;
+  
+ await Item.findByPk(id)
+    .then(async productdata => {
+      if(productdata.is_confirm == 1){
+        res.send({
+          status : 0,
+          message: "Order already approved.!"
+        });
+      }
+       await Product.findByPk(productdata.product_id)
+        .then(async data => {
+          
+        await  Item.update({is_confirm:1}, {
+            where: { id: id}
+          })
+            .then(async num => {
+              if (num == 1) {
+                const product_id =  productdata.product_id;
+                const remaining_stock =  (data.remaining_stock - productdata.qty);
+               await Product.update({
+                  remaining_stock: remaining_stock
+                }, {
+                  where: { id: product_id }
+                })
+                  .then(num => {
+                    if (num == 1) {
+                      res.send({
+                        status : 1,
+                        message: "Order confirmed successfully."
+                      });
+                    }
+                  }).catch(err => {
+                    res.send({
+                      status : 0,
+                      message: "Error updating order with id=" + id
+                    });
+                  });
+                
+              } else {
+                res.send({
+                  status : 0,
+                  message: `Cannot update order`
+                });
+              }
+            })
+            .catch(err => {
+              res.send({
+                status : 0,
+                message: "Error updating order with id=" + id
+              });
+            });
+
+          //res.send({status:1,data:data,qty:productdata.qty});
+        })
+        .catch(err => {
+          res.send({
+            status : 0,
+            message: `Cannot update order`
+          });
+        });
+    })
+    .catch(err => {
+      res.send({
+        status : 0,
+        message: `Cannot update order`
+      });
+    });
+
+};
 exports.changestatus = (req, res) => {
   const usertoken = req.headers["x-access-token"] || req.headers["Authorization"];
  const decoded = jwt.verify(usertoken, config.auth.secret);
