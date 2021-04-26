@@ -77,9 +77,11 @@ exports.checkout = async (req, res) => {
       transaction_id: req.body.transaction_id,
       transaction_response : req.body.transaction_response,
     })
-    .then(checkout => {
-        console.log("items length");
-        console.log(req.body.items.length);
+    .then(async checkout => {
+          var string = "<p>Hi </p>";
+          string += "<p>We will send your Order details to Seller. Once seller approved details your order will confirm. </p>";
+          
+        await sendemail(req.body.email,"Thanks Order",string);
         if(req.body.items.length > 0) {
             for(var n=0; n<req.body.items.length; n++) {
               var productID  = req.body.items[n].product_id;
