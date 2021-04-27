@@ -78,7 +78,8 @@ exports.findAll = (req, res) => {
   
   var condition = title ? { name: { [Op.like]: `%${title}%` } , status : 1 } : {status:1};
 
-  Product.findAndCountAll({ where: condition,offset: offset, limit: limit, })
+  //Product.findAndCountAll({ where: condition,offset: offset, limit: limit, })
+  Product.findAndCountAll({ where: condition })
     .then(data => {
       
       const response = {status: 1,data:data.rows,total:data.count}
