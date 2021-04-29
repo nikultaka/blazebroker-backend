@@ -69,10 +69,17 @@ exports.findAll = async(req, res) => {
 var condition_string = '';
   var query  = 'select p.*,u.name as seller_name,u.company_name as company_name from  products  as p left join  users as u on p.seller_id = u.id where u.status= 1';
   if(title != ''){
-    condition_string = "AND p.name LIKE "+`%${title}%`;
+    condition_string = " AND p.name LIKE '"+`%${title}%`+"'";
   }
+
+  //console.log(condition_string);
   
-  query.concat(condition_string);
+  //query.concat(condition_string);
+
+  query+=condition_string;
+
+  console.log(query);
+
   await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
     res.json({ status : 1 ,data : rows ,total:rows.count});    
   }).catch(err => {
