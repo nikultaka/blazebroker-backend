@@ -8,7 +8,7 @@ const app = express();
 
 
 const corsOptions = {
-  origin: "http://localhost:3000"
+  origin: "http://blaze.palladiumhub.com"
 };
 
 app.use(cors(corsOptions));
