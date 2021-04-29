@@ -63,31 +63,45 @@ exports.create = (req, res) => {
 };
 
 
-exports.findAll = (req, res) => {
+exports.findAll = async(req, res) => {
   const title = req.query.name;
-  let page = 0;
-  let limit = 18;
-  if(typeof req.query.page !=undefined && req.query.page!=null && req.query.page!='undefined') {
-    page = req.query.page;
-  }
-  
-  let offset = 0;
-  if(page !=0) {
-    offset = limit*page;
-  }
-  
-  var condition = title ? { name: { [Op.like]: `%${title}%` } , status : 1 } : {status:1};
 
-  //Product.findAndCountAll({ where: condition,offset: offset, limit: limit, })
-  Product.findAndCountAll({ where: condition })
-    .then(data => {
+var condition_string = '';
+  var query  = 'select p.*,u.name as seller_name,u.company_name as company_name from  products  as p left join  users as u on p.seller_id = u.id where u.status= 1';
+  if(title != ''){
+    condition_string = "AND p.name LIKE "+`%${title}%`;
+  }
+  
+  query.concat(condition_string);
+  await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
+    res.json({ status : 1 ,data : rows ,total:rows.count});    
+  }).catch(err => {
+    res.send({status:0,data:[]});
+  });
+
+  // let page = 0;
+  // let limit = 18;
+  // if(typeof req.query.page !=undefined && req.query.page!=null && req.query.page!='undefined') {
+  //   page = req.query.page;
+  // }
+  
+  // let offset = 0;
+  // if(page !=0) {
+  //   offset = limit*page;
+  // }
+  
+  // var condition = title ? { name: { [Op.like]: `%${title}%` } , status : 1 } : {status:1};
+
+  // //Product.findAndCountAll({ where: condition,offset: offset, limit: limit, })
+  // Product.findAndCountAll({ where: condition })
+  //   .then(data => {
       
-      const response = {status: 1,data:data.rows,total:data.count}
-      res.send(response);
-    })
-    .catch(err => {
-      res.send({status:0,data:[]});
-    });
+  //     const response = {status: 1,data:data.rows,total:data.count}
+  //     res.send(response);
+  //   })
+  //   .catch(err => {
+  //     res.send({status:0,data:[]});
+  //   });
 };
 exports.getAll = async (req, res)=>{
   var query  = 'select p.*,u.name as seller_name,u.company_name as company_name from  products  as p left join  users as u on p.seller_id = u.id ';
@@ -220,7 +234,7 @@ exports.uploadimage = (req, res) => {
 
 exports.orderlist = async (req, res) => {
   const user_id = req.userId;
-  var query  = 'select distinct c.id as order_id,i.id as item_id,i.qty as qty,i.created_at as order_date,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id where p.seller_id ='+user_id+' ';
+  var query  = 'select distinct c.id as order_id,c.email as user_email,c.mobile as user_mobile,i.id as item_id,i.qty as qty,i.created_at as order_date,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id where p.seller_id ='+user_id+' ';
   
   await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
     res.json({ status : 1 ,data : rows});    
@@ -372,7 +386,7 @@ exports.allorderlist = async (req, res) => {
       data : []
     });
   }
-  var query  = 'select distinct c.id as order_id,u.name as seller_name,i.id as item_id,i.qty as qty,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id  left join users as u on u.id = p.seller_id';
+  var query  = 'select distinct c.id as order_id,c.email as user_email,c.mobile as user_mobile,u.name as seller_name,i.id as item_id,i.qty as qty,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id  left join users as u on u.id = p.seller_id';
   
   await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
     res.json({ status : 1 ,data : rows});    
