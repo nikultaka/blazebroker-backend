@@ -1,6 +1,8 @@
 const db = require("../models");
 const Checkout = db.checkouts;
 const Item = db.items;
+const CartItem = db.cart_items;
+const Product = db.products;
 const Op = db.Op;
 const { Sequelize } = require("sequelize");
 const config = require("../config/config.js");
@@ -40,7 +42,7 @@ exports.moderatorBoard = (req, res) => {
   res.status(200).send("Moderator Content.");
 };
 async function sendemail(email,subject,text) {
-  console.log("sendmail");
+  
   let transporter = await nodemailer.createTransport({
     host: "p3plcpnl0888.prod.phx3.secureserver.net",
     port: 465,
@@ -51,10 +53,6 @@ async function sendemail(email,subject,text) {
     },
   });
 
-  console.log("transporter");
-  console.log(email);
-  console.log(subject);
-  console.log(text);
   
   let info = await transporter.sendMail({
     from: '"Nikul Panchal 👻" <nikul@palladiumhub.com>', 
@@ -63,12 +61,10 @@ async function sendemail(email,subject,text) {
     text: text, 
     html: text, 
   });
-  console.log(info);
-  console.log("Message sent: %s", info.messageId);
-  console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+  
 }
 exports.checkout = async (req, res) => {
-  console.log(req.body);
+  
     Checkout.create({
       email: req.body.email,
       mobile: req.body.mobile,
@@ -85,6 +81,7 @@ exports.checkout = async (req, res) => {
         if(req.body.items.length > 0) {
             for(var n=0; n<req.body.items.length; n++) {
               var productID  = req.body.items[n].product_id;
+              var CartId  = req.body.items[n].CartId;
               Item.create({
                 checkout_id: checkout.id,
                 product_id: req.body.items[n].product_id,
@@ -92,23 +89,35 @@ exports.checkout = async (req, res) => {
               })
               .then(async item => {
                 
-                //console.log(user);
-                //console.log(productID);
-                var query  = 'SELECT products.*,users.email FROM `products` left join users on users.id = products.seller_id where products.id = '+productID;
-                
-                await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(async function(rows) {
-                  if(rows[0]){
-                    var order_string = "<p>Product Name  : " + rows[0].name + "</p>";
-                      order_string += "<p>Stock : " + rows[0].remaining_stock + "</p>";
-                      order_string += "<p>User Email : " + req.body.email + "</p>";
-                      order_string += "<p>User Mobile : " + req.body.mobile + "</p>";
-                      order_string += "<p>Transation Id : " + req.body.transaction_id + "</p>";
-                      order_string += "<p><a href='"+config.SITE_URL+"/order-confirm/"+item.id+"'>confirm Order</a></p>";
+                Product.findByPk(item.product_id)
+                  .then(async productdata => {
+                    
+                      Product.update({
+                        remaining_stock : (productdata.remaining_stock - item.qty)
+                      }, {
+                        where: { id: item.product_id }
+                      }).then(async productdataupdate => {
+                        CartItem.destroy({
+                          where: { id: CartId }
+                        }).then(async num => {
+                            var query  = 'SELECT products.*,users.email FROM `products` left join users on users.id = products.seller_id where products.id = '+productID;
+                            
+                            await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(async function(rows) {
+                              if(rows[0]){
+                                var order_string = "<p>Product Name  : " + rows[0].name + "</p>";
+                                  order_string += "<p>Stock : " + rows[0].remaining_stock + "</p>";
+                                  order_string += "<p>User Email : " + req.body.email + "</p>";
+                                  order_string += "<p>User Mobile : " + req.body.mobile + "</p>";
+                                  order_string += "<p>Transation Id : " + req.body.transaction_id + "</p>";
+                                  order_string += "<p><a href='"+config.SITE_URL+"/order-confirm/"+item.id+"'>confirm Order</a></p>";
 
-                    await sendemail(rows[0].email,"New Order",order_string);
-                  }
-                  
-                });
+                                await sendemail(rows[0].email,"New Order",order_string);
+                              }
+                              
+                            });
+                        })
+                      })
+                  })
               })
               .catch(err => {
                 res.send({ status : 0,message: "something went wrong"});
@@ -116,7 +125,7 @@ exports.checkout = async (req, res) => {
             }
         }
         res.send({ status : 1,message: "checkout completed successfully!",id:checkout.id});
-    }).bind(productID)
+    }).bind(productID,CartId)
     .catch(err => {
       console.log("err");
       console.log(err);
