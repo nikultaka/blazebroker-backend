@@ -41,6 +41,7 @@ require("./app/routes/book.routes")(app);
 require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
 require("./app/routes/product.routes")(app);
+require("./app/routes/cart_item.routes")(app);
 
 
 

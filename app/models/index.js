@@ -28,6 +28,7 @@ db.sequelize = sequelize;
 db.books = require("./book.model.js")(sequelize, Sequelize, DataTypes);
 db.user = require("./user.model.js")(sequelize, Sequelize, DataTypes);
 db.products = require("./product.model.js")(sequelize, Sequelize, DataTypes);
+db.cart_items = require("./cart_item.model.js")(sequelize, Sequelize, DataTypes);
 db.checkouts = require("./checkout.model.js")(sequelize, Sequelize, DataTypes);
 db.items = require("./item.model.js")(sequelize, Sequelize, DataTypes);
 db.role = require("./role.model.js")(sequelize, Sequelize, DataTypes);

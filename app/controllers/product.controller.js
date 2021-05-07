@@ -1,6 +1,7 @@
 const db = require("../models");
 const Product = db.products;
 const Item = db.items;
+const CartItem = db.cart_items;
 const Op = db.Op;
 const Checkout = db.checkouts;
 const { Sequelize } = require("sequelize");
@@ -152,8 +153,18 @@ exports.findOne = (req, res) => {
   const id = req.params.id;
 
   Product.findByPk(id)
-    .then(data => {
-      res.send({status:1,data:data});
+    .then(async data => {
+      
+      var query  = 'select SUM(ci.qty) as pending_qty from cart_items  as ci where ci.product_id = '+data.id+' LIMIT 1';
+ 
+        await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function([rows]) {
+          data.remaining_stock = (data.remaining_stock - rows.pending_qty);
+          res.json({ status : 1 ,data : data });    
+        }).catch(err => {
+          res.send({status:0,data:[]});
+        });
+
+      //res.send({status:1,data:data});
     })
     .catch(err => {
         res.send({status:0,data:[]});
@@ -256,27 +267,32 @@ exports.orderconfirm = (req, res) => {
   })
     .then(num => {
       if (num == 1) {
-        const product_id =  req.body.product_id;
-        const remaining_stock =  req.body.remaining_stock;
-        Product.update({
-          remaining_stock: remaining_stock
-        }, {
-          where: { id: product_id }
-        })
-          .then(num => {
-            if (num == 1) {
-              res.send({
-                status : 1,
-                message: "Order confirmed successfully."
-              });
-            }
-          }).catch(err => {
-            res.send({
-              status : 0,
-              message: "Error updating order with id=" + id
-            });
-          });
-        
+        // const product_id =  req.body.product_id;
+        // const remaining_stock =  req.body.remaining_stock;
+        // Product.update({
+        //   remaining_stock: remaining_stock
+        // }, {
+        //   where: { id: product_id }
+        // })
+        //   .then(num => {
+        //     if (num == 1) {
+        //       res.send({
+        //         status : 1,
+        //         message: "Order confirmed successfully."
+        //       });
+        //     }
+        //   }).catch(err => {
+        //     res.send({
+        //       status : 0,
+        //       message: "Error updating order with id=" + id
+        //     });
+        //   });
+       
+          res.send({
+            status : 1,
+            message: "Order confirmed successfully."
+          });  
+          
       } else {
         res.send({
           status : 0,
@@ -310,27 +326,30 @@ exports.mailorderconfirm = async(req, res) => {
           })
             .then(async num => {
               if (num == 1) {
-                const product_id =  productdata.product_id;
-                const remaining_stock =  (data.remaining_stock - productdata.qty);
-               await Product.update({
-                  remaining_stock: remaining_stock
-                }, {
-                  where: { id: product_id }
-                })
-                  .then(num => {
-                    if (num == 1) {
-                      res.send({
-                        status : 1,
-                        message: "Order confirmed successfully."
-                      });
-                    }
-                  }).catch(err => {
-                    res.send({
-                      status : 0,
-                      message: "Error updating order with id=" + id
-                    });
+              //   const product_id =  productdata.product_id;
+              //   const remaining_stock =  (data.remaining_stock - productdata.qty);
+              //  await Product.update({
+              //     remaining_stock: remaining_stock
+              //   }, {
+              //     where: { id: product_id }
+              //   })
+              //     .then(num => {
+              //       if (num == 1) {
+              //         res.send({
+              //           status : 1,
+              //           message: "Order confirmed successfully."
+              //         });
+              //       }
+              //     }).catch(err => {
+              //       res.send({
+              //         status : 0,
+              //         message: "Error updating order with id=" + id
+              //       });
+              //     });
+                  res.send({
+                    status : 1,
+                    message: "Order confirmed successfully."
                   });
-                
               } else {
                 res.send({
                   status : 0,
