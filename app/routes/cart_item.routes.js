@@ -6,8 +6,9 @@ module.exports = app => {
 
   router.post("/list", cartItemController.findAll); //,[authJwt.verifyToken]
   router.post("/", cartItemController.create);
+  router.get("/cron", cartItemController.cartCron); //,[authJwt.verifyToken]
   router.get("/:id", cartItemController.findOne); //,[authJwt.verifyToken]
-  router.post("/cron", cartItemController.cartCron); //,[authJwt.verifyToken]
+  
 
   router.put("/:id", cartItemController.update);
 
