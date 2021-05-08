@@ -3,8 +3,9 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const config = require("./app/config/config.js");
 const fileupload = require('express-fileupload');
-
+const cart_item = require("./app/controllers/cart_item.controller.js");
 const app = express();
+var cron = require('node-cron');
 
 
 const corsOptions = {
@@ -22,7 +23,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileupload());
 
 app.use(express.static(__dirname + '/uploads'));
-app.use(express.static(__dirname + '/uploads/product'));
+//app.use(express.static(__dirname + '/uploads/product'));
 
 // database
 const db = require("./app/models");
@@ -68,3 +69,7 @@ function initial() {
     name: "admin"
   });
 }
+
+cron.schedule('*/1 * * * *', () => {
+  cart_item.cartCron();
+})
