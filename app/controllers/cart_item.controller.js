@@ -141,6 +141,7 @@ exports.cartCron = (req,res) =>{
           message: "Cart Items deleted successfully!"
         });
       }else{
+        
         res.send({
           status : 1,
           message: "No Cart Items deleted!"

@@ -4,6 +4,8 @@ const Item = db.items;
 const CartItem = db.cart_items;
 const Op = db.Op;
 const Checkout = db.checkouts;
+const sharp = require('sharp');
+const uuid  = require('uuid'); 
 const { Sequelize } = require("sequelize");
 const config = require("../config/config.js");
 const jwt = require("jsonwebtoken");
@@ -228,14 +230,17 @@ exports.delete = (req, res) => {
 
 
 exports.uploadimage = (req, res) => {
-  
   const id = req.body.id;
-  let filename = req.files.productimage.name;
-  filename = filename.split(" ").join("_");
+  var filename = uuid.v1()+'.jpg';
+  //let filename = req.files.productimage.name;
+  //filename = filename.split(" ").join("_");
+  
   req.files.productimage.mv('./uploads/product/'+filename, function(err, result) {
       if(err) 
         throw err;
 
+    sharp('./uploads/product/'+filename).resize({ height:100, width:100}).toFile('./uploads/product/resize/'+filename)
+    .then(function(newFileInfo){
       Product.update({
         image: filename
       },{where: { id: id }})        
@@ -244,6 +249,15 @@ exports.uploadimage = (req, res) => {
         message: "image uploaded successfully!"
       });
 
+    })
+    .catch(function(err){
+      res.send({
+        status : 1,  
+        message: "image uploaded Fail.!"
+      });
+
+    });
+    
    });
   
 };
