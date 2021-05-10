@@ -72,7 +72,7 @@ exports.findAll = async(req, res) => {
 var condition_string = '';
   var query  = 'select p.*,u.name as seller_name,u.company_name as company_name from  products  as p left join  users as u on p.seller_id = u.id where u.status= 1 AND p.status = 1';
   if(title != ''){
-    condition_string = " AND p.name LIKE '"+`%${title}%`+"'";
+    condition_string = " AND p.name LIKE '"+`${title}%`+"'";
   }
 
   //console.log(condition_string);
@@ -114,7 +114,8 @@ var condition_string = '';
   //   });
 };
 exports.getAll = async (req, res)=>{
-  var query  = 'select p.*,u.name as seller_name,u.company_name as company_name from  products  as p left join  users as u on p.seller_id = u.id ';
+  //var query  = 'select p.*,u.name as seller_name,u.company_name as company_name from  products  as p left join  users as u on p.seller_id = u.id ';
+  var query  = 'select p.*,u.name as seller_name,u.company_name as company_name,IF(sum(CONCAT(ci.qty)) IS NOT null , sum(CONCAT(ci.qty)),0) as total_product_in_cart from  products  as p   left join  users as u on p.seller_id = u.id   left JOIN cart_items as ci on ci.product_id = p.id  GROUP by p.id';
   
   await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
     res.json({ status : 1 ,data : rows});    
@@ -123,31 +124,42 @@ exports.getAll = async (req, res)=>{
   });
 
 }
-exports.findAllSeller = (req, res) => {
+exports.findAllSeller = async(req, res) => {
   const title = req.query.name;
   const user_id = req.userId;
-  let page = 0;
-  let limit = 1800;
-  if(typeof req.query.page !=undefined && req.query.page!=null && req.query.page!='undefined') {
-    page = req.query.page;
-  }
-  console.log("page:"+page);
-  let offset = 0;
-  if(page !=0) {
-    offset = limit*page;
-  }
-  console.log(page);    
-  var condition = title ? { name: { [Op.like]: `%${title}%` }, seller_id:user_id } : {seller_id:user_id};
 
-  Product.findAndCountAll({ where: condition,offset: offset, limit: limit, })
-    .then(data => {
-      //console.log(data);
-      const response = {status: 1,data:data.rows,total:data.count}
-      res.send(response);
-    })
-    .catch(err => {
-      res.send({status:0,data:[]});
-    });
+  var query  = 'SELECT p.*,IF(sum(CONCAT(ci.qty)) IS NOT null , sum(CONCAT(ci.qty)),0) as total_product_in_cart FROM `products` as p left JOIN cart_items as ci on ci.product_id = p.id  where p.seller_id = '+user_id+'  GROUP by p.id';
+  
+  
+  await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
+    res.json({ status : 1 ,data : rows ,total:rows.count});    
+  }).catch(err => {
+    res.send({status:0,data:[]});
+  });
+
+  
+  // let page = 0;
+  // let limit = 1800;
+  // if(typeof req.query.page !=undefined && req.query.page!=null && req.query.page!='undefined') {
+  //   page = req.query.page;
+  // }
+  // console.log("page:"+page);
+  // let offset = 0;
+  // if(page !=0) {
+  //   offset = limit*page;
+  // }
+  // console.log(page);    
+  // var condition = title ? { name: { [Op.like]: `%${title}%` }, seller_id:user_id } : {seller_id:user_id};
+
+  // Product.findAndCountAll({ where: condition,offset: offset, limit: limit, })
+  //   .then(data => {
+  //     //console.log(data);
+  //     const response = {status: 1,data:data.rows,total:data.count}
+  //     res.send(response);
+  //   })
+  //   .catch(err => {
+  //     res.send({status:0,data:[]});
+  //   });
 };
 
 
