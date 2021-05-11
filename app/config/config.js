@@ -1,7 +1,7 @@
 module.exports = {
   NODE_ENV: process.env.NODE_ENV,
   PORT: process.env.PORT,
-  SITE_URL : 'http://blaze.palladiumhub.com',
+  SITE_URL : 'http://192.163.31.3',
   CART_ITEM_TIME :'2',
 
   /** DATABASE */

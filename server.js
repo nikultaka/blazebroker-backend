@@ -9,7 +9,7 @@ var cron = require('node-cron');
 
 
 const corsOptions = {
-  origin: "http://blaze.palladiumhub.com"
+  origin: "http://192.163.31.3"
 };
 
 app.use(cors(corsOptions));
@@ -70,6 +70,6 @@ function initial() {
   });
 }
 
-cron.schedule('*/1 * * * *', () => {
+cron.schedule('*/2 * * * *', () => {
   cart_item.cartCron();
 })
