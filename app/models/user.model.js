@@ -58,7 +58,11 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
       status:{
         type: DataTypes.TINYINT,
         default : 1
-      }  
+      },  
+      image: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      }
     },
     {    
       // Options
