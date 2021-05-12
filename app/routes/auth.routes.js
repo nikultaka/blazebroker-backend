@@ -23,6 +23,7 @@ module.exports = function(app) {
 
   /********* Admin Section API */
   app.get("/api/auth/userlist", controller.userlist);
+  
   app.put("/api/auth/sellerupdate",[authJwt.verifyToken],controller.sellerupdate);
   app.delete("/api/auth/delete/:id",[authJwt.verifyToken], controller.delete);
   app.put("/api/auth/changestatus",[authJwt.verifyToken],controller.changestatus);
@@ -33,6 +34,7 @@ module.exports = function(app) {
   app.post("/api/auth/resetpassword",[authJwt.verifyToken],controller.resetpassword);
   app.post("/api/auth/basicupdate",[authJwt.verifyToken],controller.basicupdate);
   app.get("/api/auth/user",[authJwt.verifyToken],controller.user);
+  app.post("/api/auth/profile_image",[authJwt.verifyToken],controller.profile_image);
   app.post("/api/auth/uploaddocument",controller.uploaddocument);
   app.post("/api/auth/forgotpassword",controller.forgotpassword);
   app.post("/api/auth/resetpassword-frontend",controller.resetpasswordfrontend);

@@ -7,6 +7,8 @@ const upload = multer({ dest: 'uploads/' })
 const User = db.user;
 const Role = db.role;
 const Op = db.Op;
+const sharp = require('sharp');
+const uuid  = require('uuid'); 
 const nodemailer = require("nodemailer");
 const { Sequelize } = require("sequelize");
 
@@ -138,6 +140,7 @@ exports.signin = (req, res) => {
           username: user.username,
           name: user.name,
           email: user.email,
+          image: user.image,
           roles: authorities[0],
           accessToken: token
         });
@@ -239,6 +242,40 @@ exports.uploaddocument = (req, res) => {
         message: "document uploaded successfully!"
       });
    });
+  
+};
+
+exports.profile_image = (req, res) => {
+  
+  const userID = req.userId;
+  
+  var filename = uuid.v1()+'.jpg';
+
+  req.files.profileimage.mv('./uploads/profile/'+filename, function(err, result) {
+    if(err) 
+      throw err;
+
+  sharp('./uploads/profile/'+filename).resize({ height:100, width:100}).toFile('./uploads/profile/resize/'+filename)
+  .then(function(newFileInfo){
+    User.update({
+      image: filename
+    },{where: { id: userID }})        
+    res.send({
+      status : 1,  
+      message: "image uploaded successfully!",
+      file_name : filename
+    });
+
+  })
+  .catch(function(err){
+    res.send({
+      status : 1,  
+      message: "image uploaded Fail.!"
+    });
+
+  });
+  
+ });
   
 };
 
