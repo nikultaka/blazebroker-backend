@@ -9,6 +9,8 @@ const uuid  = require('uuid');
 const { Sequelize } = require("sequelize");
 const config = require("../config/config.js");
 const jwt = require("jsonwebtoken");
+const csv = require('csv-parser');
+var fs = require('fs');
 const sequelize = new Sequelize(
   config.db.DB_NAME,
   config.db.DB_USER,
@@ -284,7 +286,52 @@ exports.uploadimage = (req, res) => {
   
 };
 
+exports.importproduct = async (req, res) => {
+  //const user_id = req.userId;
 
+  var filename = uuid.v1()+'.csv';
+  var dir = './uploads/product_import';
+
+  if (!fs.existsSync(dir)){
+      fs.mkdirSync(dir);
+  }
+  await req.files.productimport.mv('./uploads/product_import/'+filename).then(async (response) => {
+    fs.createReadStream('./uploads/product_import/'+filename)
+      .pipe(csv())
+      .on('data', async(row) => {
+         // Create a product
+        const product = {
+          seller_id : 1, 
+          name: row.name,
+          sativa: row.sativa,
+          thc: row.thc,
+          description: row.description,
+          price: row.price,
+          stock: row.stock,
+          remaining_stock: row.stock,
+
+        };
+
+        // Save product in database
+      await Product.create(product)
+          .then(data => {
+              
+          })
+          .catch(err => {
+            res.status(500).send({
+              message: err.message || "Some error occurred while creating the Product."
+            });
+          });
+      })
+      .on('end', () => {
+        res.send({
+          status : 1,  
+          message: "All Product imported Successfully.!"
+        });
+      });
+  })
+
+};
 
 exports.orderlist = async (req, res) => {
   const user_id = req.userId;
