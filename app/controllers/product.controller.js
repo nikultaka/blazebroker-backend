@@ -287,21 +287,22 @@ exports.uploadimage = (req, res) => {
 };
 
 exports.importproduct = async (req, res) => {
-  //const user_id = req.userId;
-
+  
+  const user_id = req.userId;
+  
   var filename = uuid.v1()+'.csv';
-  var dir = './uploads/product_import';
-
+  var dir = './uploads/product_import/'+user_id;
+console.log(dir);
   if (!fs.existsSync(dir)){
       fs.mkdirSync(dir);
   }
-  await req.files.productimport.mv('./uploads/product_import/'+filename).then(async (response) => {
-    fs.createReadStream('./uploads/product_import/'+filename)
+  await req.files.productimport.mv(dir+'/'+filename).then(async (response) => {
+    fs.createReadStream(dir+'/'+filename)
       .pipe(csv())
       .on('data', async(row) => {
          // Create a product
         const product = {
-          seller_id : 1, 
+          seller_id : user_id, 
           name: row.name,
           sativa: row.sativa,
           thc: row.thc,
@@ -329,7 +330,7 @@ exports.importproduct = async (req, res) => {
           message: "All Product imported Successfully.!"
         });
       });
-  })
+  }).bind(user_id)
 
 };
 
