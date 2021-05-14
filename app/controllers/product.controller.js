@@ -292,42 +292,73 @@ exports.importproduct = async (req, res) => {
   
   var filename = uuid.v1()+'.csv';
   var dir = './uploads/product_import/'+user_id;
-console.log(dir);
+
   if (!fs.existsSync(dir)){
       fs.mkdirSync(dir);
   }
   await req.files.productimport.mv(dir+'/'+filename).then(async (response) => {
+    var successfully = 0;
+    var notsuccessfully = 0;
     fs.createReadStream(dir+'/'+filename)
       .pipe(csv())
       .on('data', async(row) => {
          // Create a product
-        const product = {
-          seller_id : user_id, 
-          name: row.name,
-          sativa: row.sativa,
-          thc: row.thc,
-          description: row.description,
-          price: row.price,
-          stock: row.stock,
-          remaining_stock: row.stock,
-
-        };
-
-        // Save product in database
-      await Product.create(product)
-          .then(data => {
+         var error = 0;
+         if(row.name == ''){
+          error++;
+         }
+         if(row.sativa == '' || row.sativa < 0){
+          error++;
+        }
+        if(row.thc == ''){
+          error++;
+        }
+        if(row.description == '' || row.description.length > 400){
+          error++;
+        }
+        if(row.price == '' || row.price <= 0){
+          error++;
+        }
+        if(row.stock == '' || row.stock <= 0){
+          error++;
+        }
+        if(error == 0){
+          const product = {
+            seller_id : user_id, 
+            name: row.name,
+            sativa: row.sativa,
+            thc: row.thc,
+            description: row.description,
+            price: row.price,
+            stock: row.stock,
+            remaining_stock: row.stock,
+  
+          };
+          successfully++;
+          // Save product in database
+        await Product.create(product)
+            .then(data => {
               
-          })
-          .catch(err => {
-            res.status(500).send({
-              message: err.message || "Some error occurred while creating the Product."
+            })
+            .catch(err => {
+              notsuccessfully++;
+              res.status(500).send({
+                message: err.message || "Some error occurred while creating the Product."
+              });
             });
-          });
+        }else{
+          notsuccessfully++;
+        }
+       
       })
       .on('end', () => {
+        var errorstr = '';
+        if(notsuccessfully > 0){
+          errorstr = "Total "+notsuccessfully+" Product Not Imported";
+        }
         res.send({
           status : 1,  
-          message: "All Product imported Successfully.!"
+          message: "Total "+successfully+" Product imported Successfully.!"+errorstr
         });
       });
   }).bind(user_id)

@@ -269,7 +269,7 @@ exports.profile_image = (req, res) => {
   })
   .catch(function(err){
     res.send({
-      status : 1,  
+      status : 0,  
       message: "image uploaded Fail.!"
     });
 
