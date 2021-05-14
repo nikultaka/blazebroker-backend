@@ -1,0 +1,5 @@
+name,sativa,thc,description,price,stock,status
+Test Product name,15,Test Product Content,Test Product Description,10,5,1
+Test Product name,10,Test Product Content,Test Product Description,15,10,1
+,-10,,,-10,10,1
+Test Product name,0,Test Product Content,Test Product Content,,,1
