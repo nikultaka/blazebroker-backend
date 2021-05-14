@@ -17,6 +17,7 @@ module.exports = app => {
 
   router.get("/orderlist", [authJwt.verifyToken], productController.orderlist);
   router.post("/orderconfirm", [authJwt.verifyToken], productController.orderconfirm);
+  router.post("/importproduct", [authJwt.verifyToken], productController.importproduct); //
   router.post("/mailorderconfirm", productController.mailorderconfirm);
   
 
