@@ -303,62 +303,69 @@ exports.importproduct = async (req, res) => {
       .pipe(csv())
       .on('data', async(row) => {
          // Create a product
+         console.log(row);
          var error = 0;
-         if(row.name == ''){
-          error++;
-         }
-         if(row.sativa == '' || row.sativa < 0){
-          error++;
-        }
-        if(row.thc == ''){
-          error++;
-        }
-        if(row.description == '' || row.description.length > 400){
-          error++;
-        }
-        if(row.price == '' || row.price <= 0){
-          error++;
-        }
-        if(row.stock == '' || row.stock <= 0){
-          error++;
-        }
-        if(error == 0){
-          const product = {
-            seller_id : user_id, 
-            name: row.name,
-            sativa: row.sativa,
-            thc: row.thc,
-            description: row.description,
-            price: row.price,
-            stock: row.stock,
-            remaining_stock: row.stock,
-  
-          };
-          successfully++;
-          // Save product in database
-        await Product.create(product)
-            .then(data => {
-              
-            })
-            .catch(err => {
+         if(row.name == '' && row.sativa == '' && row.thc == '' && row.description == '' && row.price == '' && row.stock == ''){
+
+         }else{
+            if(row.name == ''){
+              error++;
+            }
+            if(row.sativa == '' || row.sativa < 0){
+              error++;
+            }
+            if(row.thc == ''){
+              error++;
+            }
+            if(row.description == '' || row.description.length > 400){
+              error++;
+            }
+            if(row.price == '' || row.price <= 0){
+              error++;
+            }
+            if(row.stock == '' || row.stock <= 0){
+              error++;
+            }
+            if(error == 0){
+              const product = {
+                seller_id : user_id, 
+                name: row.name,
+                sativa: row.sativa,
+                thc: row.thc,
+                description: row.description,
+                price: row.price,
+                stock: row.stock,
+                remaining_stock: row.stock,
+      
+              };
+              successfully++;
+              // Save product in database
+            await Product.create(product)
+                .then(data => {
+                  
+                })
+                .catch(err => {
+                  notsuccessfully++;
+                  res.status(500).send({
+                    message: err.message || "Some error occurred while creating the Product."
+                  });
+                });
+            }else{
               notsuccessfully++;
-              res.status(500).send({
-                message: err.message || "Some error occurred while creating the Product."
-              });
-            });
-        }else{
-          notsuccessfully++;
-        }
+            }
+         }
+         
+        
        
       })
       .on('end', () => {
         var errorstr = '';
         if(notsuccessfully > 0){
-          errorstr = "Total "+notsuccessfully+" Product Not Imported";
+          errorstr = "<br/><span  style='color:#fa7814 !important'>Total "+notsuccessfully+" Product Not Imported.!</span>";
         }
         res.send({
           status : 1,  
-          message: "Total "+successfully+" Product imported Successfully.!"+errorstr
+          message: "<span style='color:#009600 !important'>Total "+successfully+" Product imported Successfully.!</span>"+errorstr
         });
       });
   }).bind(user_id)
