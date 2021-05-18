@@ -32,6 +32,8 @@ db.cart_items = require("./cart_item.model.js")(sequelize, Sequelize, DataTypes)
 db.checkouts = require("./checkout.model.js")(sequelize, Sequelize, DataTypes);
 db.items = require("./item.model.js")(sequelize, Sequelize, DataTypes);
 db.role = require("./role.model.js")(sequelize, Sequelize, DataTypes);
+db.country = require("./country.model.js")(sequelize, Sequelize, DataTypes);
+db.state = require("./state.model.js")(sequelize, Sequelize, DataTypes);
 
 db.role.belongsToMany(db.user, {
   through: "user_roles",
