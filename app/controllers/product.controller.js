@@ -84,7 +84,8 @@ exports.findAll = async(req, res) => {
 var condition_string = '';
   var query  = 'select p.*,u.name as seller_name,u.company_name as company_name from  products  as p left join  users as u on p.seller_id = u.id where u.status= 1 AND p.status = 1';
   if(title != ''){
-    condition_string = " AND p.name LIKE '"+`${title}%`+"'";
+    condition_string = " AND (p.name LIKE '"+`%${title.toLowerCase()}%`+"'";
+    condition_string += " OR p.description LIKE '"+`%${title.toLowerCase()}%`+"')";
   }
 
   //console.log(condition_string);
