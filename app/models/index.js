@@ -34,6 +34,7 @@ db.items = require("./item.model.js")(sequelize, Sequelize, DataTypes);
 db.role = require("./role.model.js")(sequelize, Sequelize, DataTypes);
 db.country = require("./country.model.js")(sequelize, Sequelize, DataTypes);
 db.state = require("./state.model.js")(sequelize, Sequelize, DataTypes);
+db.product_type = require("./product_type.model.js")(sequelize, Sequelize, DataTypes);
 
 db.role.belongsToMany(db.user, {
   through: "user_roles",

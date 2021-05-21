@@ -15,6 +15,10 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
       name: {
         type: DataTypes.STRING
       },
+      product_type :{
+        type: DataTypes.INTEGER,
+        allowNull: true
+      },
       sativa: {
         type: DataTypes.STRING
       },
@@ -22,7 +26,7 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
         type: DataTypes.STRING
       },
       description: {
-        type: DataTypes.STRING
+        type: DataTypes.TEXT
       },
       image: {
         type: DataTypes.STRING
@@ -38,7 +42,7 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
       },
       status:{
         type: DataTypes.TINYINT,
-        default : 1
+        defaultValue : 1 
       },
       created_at: {
         allowNull: false,

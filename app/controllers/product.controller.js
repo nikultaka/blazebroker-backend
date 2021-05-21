@@ -4,6 +4,7 @@ const Item = db.items;
 const CartItem = db.cart_items;
 const Op = db.Op;
 const Checkout = db.checkouts;
+const ProductType = db.product_type;
 const sharp = require('sharp');
 const uuid  = require('uuid'); 
 const { Sequelize } = require("sequelize");
@@ -11,6 +12,7 @@ const config = require("../config/config.js");
 const jwt = require("jsonwebtoken");
 const csv = require('csv-parser');
 var fs = require('fs');
+const { Console } = require("console");
 const sequelize = new Sequelize(
   config.db.DB_NAME,
   config.db.DB_USER,
@@ -52,7 +54,7 @@ exports.create = (req, res) => {
     price: req.body.price,
     stock: req.body.stock,
     remaining_stock: req.body.stock,
-
+    product_type : req.body.product_type,
   };
 
   // Save product in database
@@ -297,79 +299,140 @@ exports.importproduct = async (req, res) => {
   if (!fs.existsSync(dir)){
       fs.mkdirSync(dir);
   }
+  var finaldata=[];
   await req.files.productimport.mv(dir+'/'+filename).then(async (response) => {
     var successfully = 0;
     var notsuccessfully = 0;
-    fs.createReadStream(dir+'/'+filename)
+     fs.createReadStream(dir+'/'+filename)
       .pipe(csv())
       .on('data', async(row) => {
          // Create a product
-         console.log(row);
+         
          var error = 0;
-         if(row.name == '' && row.sativa == '' && row.thc == '' && row.description == '' && row.price == '' && row.stock == ''){
+         if((typeof row.name !== 'undefined' && row.name) && (typeof row.sativa !== 'undefined' && row.sativa)&& (typeof row.thc !== 'undefined' && row.thc) && (typeof row.description !== 'undefined' && row.description) && (typeof row.price !== 'undefined' && row.price) && (typeof row.stock !== 'undefined' && row.stock)&& (typeof row.product_type !== 'undefined' && row.product_type)){
+          if(row.name == '' && row.sativa == '' && row.thc == '' && row.description == '' && row.price == '' && row.stock == ''&& row.product_type == ''){
 
-         }else{
-            if(row.name == ''){
-              error++;
-            }
-            if(row.sativa == '' || row.sativa < 0){
-              error++;
-            }
-            if(row.thc == ''){
-              error++;
-            }
-            if(row.description == '' || row.description.length > 400){
-              error++;
-            }
-            if(row.price == '' || row.price <= 0){
-              error++;
-            }
-            if(row.stock == '' || row.stock <= 0){
-              error++;
-            }
-            if(error == 0){
-              const product = {
-                seller_id : user_id, 
-                name: row.name,
-                sativa: row.sativa,
-                thc: row.thc,
-                description: row.description,
-                price: row.price,
-                stock: row.stock,
-                remaining_stock: row.stock,
-      
-              };
-              successfully++;
-              // Save product in database
-            await Product.create(product)
-                .then(data => {
-                  
-                })
-                .catch(err => {
-                  notsuccessfully++;
-                  res.status(500).send({
-                    message: err.message || "Some error occurred while creating the Product."
-                  });
-                });
-            }else{
-              notsuccessfully++;
-            }
+          }else{
+             if(row.name == ''){
+               error++;
+             }
+             if(row.sativa == '' || row.sativa < 0){
+               error++;
+             }
+             if(row.thc == ''){
+               error++;
+             }
+             if(row.description == '' || row.description.length > 400){
+               error++;
+             }
+             if(row.price == '' || row.price <= 0){
+               error++;
+             }
+             if(row.stock == '' || row.stock <= 0){
+               error++;
+             }
+             if(row.product_type == ''){
+               error++;
+             }
+             
+             if(error == 0){
+               // await getproducttype(row.product_type)
+               // .then(async (producttypedetails) => {
+                 
+                 const product = {
+                   seller_id : user_id, 
+                   name: row.name,
+                   sativa: row.sativa,
+                   thc: row.thc,
+                   description: row.description,
+                   price: row.price,
+                   stock: row.stock,
+                   remaining_stock: row.stock,
+                   product_type : row.product_type
+         
+                 };
+                 finaldata.push(product)
+               //   successfully++;
+               //   // Save product in database
+               // await Product.create(product)
+               //     .then(data => {
+                     
+               //     })
+               //     .catch(err => {
+               //       console.log(err)
+               //       notsuccessfully++;
+               //       res.status(500).send({
+               //         message: err.message || "Some error occurred while creating the Product."
+               //       });
+               //     });
+               // })
+               // .catch(err => {
+               //   console.log(successfully)
+               //   notsuccessfully++;
+               // });
+ 
+               
+             }else{
+               notsuccessfully++;
+             }
+          }
+          
          }
          
         
        
       })
-      .on('end', () => {
-        var errorstr = '';
-        if(notsuccessfully > 0){
-          errorstr = "<br/><span  style='color:#fa7814 !important'>Total "+notsuccessfully+" Product Not Imported.!</span>";
+      .on('end', async() => {
+        var i;
+        
+        var totaldata = finaldata.length-1;
+        for (i = 0; i < finaldata.length; i++) { 
+          await ProductType.findOne({where: { name: { [Op.like]: finaldata[i].product_type }}}).then(async (producttypedetails) => {
+              const product = {
+                seller_id : user_id, 
+                name: finaldata[i].name,
+                sativa: finaldata[i].sativa,
+                thc: finaldata[i].thc,
+                description: finaldata[i].description,
+                price: finaldata[i].price,
+                stock: finaldata[i].stock,
+                remaining_stock: finaldata[i].stock,
+                product_type : producttypedetails.id
+      
+              };
+              await Product.create(product)
+                  .then(data => {
+                    successfully++;
+                    if(i == totaldata){
+                      
+                      var errorstr = '';
+                      if(notsuccessfully > 0){
+                        errorstr = "<br/><span  style='color:#fa7814 !important'>Total "+notsuccessfully+" Product Not Imported.!</span>";
+                      }
+                      console.log(successfully);
+                      res.send({
+                        status : 1,  
+                        message: "<span style='color:#009600 !important'>Total "+successfully+" Product imported Successfully.!</span>"+errorstr
+                      });
+                    }
+                  }).catch(err => {
+                    notsuccessfully++;
+              });
+          });
         }
-        res.send({
-          status : 1,  
-          message: "<span style='color:#009600 !important'>Total "+successfully+" Product imported Successfully.!</span>"+errorstr
-        });
+        if(finaldata.length == 0){
+          var errorstr = '';
+          if(notsuccessfully > 0){
+            errorstr = "<br/><span  style='color:#fa7814 !important'>Total "+notsuccessfully+" Product Not Imported.!</span>";
+          }
+          console.log(successfully);
+          res.send({
+            status : 1,  
+            message: "<span style='color:#009600 !important'>Total "+successfully+" Product imported Successfully.!</span>"+errorstr
+          });
+        }
       });
-  }).bind(user_id)
+  })
 
 };
 

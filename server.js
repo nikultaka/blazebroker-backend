@@ -8,8 +8,8 @@ const app = express();
 var cron = require('node-cron');
 
 
-const corsOptions = {
-  origin: "http://192.163.31.3"
+const corsOptions = { 
+  origin: config.SITE_URL
 };
 
 app.use(cors(corsOptions));
@@ -46,6 +46,7 @@ require("./app/routes/user.routes")(app);
 require("./app/routes/product.routes")(app);
 require("./app/routes/cart_item.routes")(app);
 require("./app/routes/state.routes")(app);
+require("./app/routes/product_type.routes")(app);
 
 
 
