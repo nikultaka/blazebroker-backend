@@ -86,8 +86,8 @@ exports.findAll = async(req, res) => {
 var condition_string = '';
   var query  = 'select p.*,u.name as seller_name,u.company_name as company_name from  products  as p left join  users as u on p.seller_id = u.id where u.status= 1 AND p.status = 1';
   if(title != ''){
-    condition_string = " AND (p.name LIKE '"+`%${title.toLowerCase()}%`+"'";
-    condition_string += " OR p.description LIKE '"+`%${title.toLowerCase()}%`+"')";
+    condition_string = " AND (p.name LIKE '"+`%${title}%`+"'";
+    condition_string += " OR p.description LIKE '"+`%${title}%`+"')";
   }
 
   //console.log(condition_string);
@@ -386,9 +386,14 @@ exports.importproduct = async (req, res) => {
         var i;
         
         var totaldata = finaldata.length-1;
+        console.log(totaldata);
         for (i = 0; i < finaldata.length; i++) { 
           await ProductType.findOne({where: { name: { [Op.like]: finaldata[i].product_type }}}).then(async (producttypedetails) => {
-              const product = {
+            var producttypedetailsid = '';
+            var product;
+            if(producttypedetails){
+              var producttypedetailsid = producttypedetails.id;
+              product = {
                 seller_id : user_id, 
                 name: finaldata[i].name,
                 sativa: finaldata[i].sativa,
@@ -397,9 +402,12 @@ exports.importproduct = async (req, res) => {
                 price: finaldata[i].price,
                 stock: finaldata[i].stock,
                 remaining_stock: finaldata[i].stock,
-                product_type : producttypedetails.id
+                product_type : producttypedetailsid
       
               };
+            }
+              
+              
               await Product.create(product)
                   .then(data => {
                     successfully++;
@@ -417,6 +425,18 @@ exports.importproduct = async (req, res) => {
                     }
                   }).catch(err => {
                     notsuccessfully++;
+                    if(i == totaldata){
+                      
+                      var errorstr = '';
+                      if(notsuccessfully > 0){
+                        errorstr = "<br/><span  style='color:#fa7814 !important'>Total "+notsuccessfully+" Product Not Imported.!</span>";
+                      }
+                      console.log(successfully);
+                      res.send({
+                        status : 1,  
+                        message: "<span style='color:#009600 !important'>Total "+successfully+" Product imported Successfully.!</span>"+errorstr
+                      });
+                    }
               });
           });
         }
