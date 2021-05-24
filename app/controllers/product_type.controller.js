@@ -49,7 +49,7 @@ exports.create = (req, res) => {
 exports.findAll = async(req, res) => {
   
   
-  ProductType.findAll()
+  ProductType.findAll({where:{status:1}})
     .then(data => {
       res.send({status:1,data:data});
     })
