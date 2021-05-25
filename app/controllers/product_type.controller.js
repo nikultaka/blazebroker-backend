@@ -58,6 +58,18 @@ exports.findAll = async(req, res) => {
     });
   
 };
+exports.findAllforAdmin = async(req, res) => {
+  
+  
+  ProductType.findAll()
+    .then(data => {
+      res.send({status:1,data:data});
+    })
+    .catch(err => {
+      res.send({status:0,data:[]});
+    });
+  
+};
 
 exports.findOne = (req, res) => {
   const id = req.params.id;
