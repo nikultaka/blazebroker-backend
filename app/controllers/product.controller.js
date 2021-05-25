@@ -310,7 +310,7 @@ exports.importproduct = async (req, res) => {
          
          var error = 0;
          const product={};
-         if((typeof row.name !== 'undefined' && row.name)  && (typeof row.description !== 'undefined' && row.description) && (typeof row.price !== 'undefined' && row.price) && (typeof row.stock !== 'undefined' && row.stock)){
+         if((typeof row.name !== 'undefined' && row.name)  && (typeof row.description !== 'undefined' && row.description)){
           if(row.name == '' && row.description == '' ){
 
           }else{
@@ -402,6 +402,8 @@ exports.importproduct = async (req, res) => {
              }
           }
           
+         }else{
+           console.log(row)
          }
          
         
@@ -494,7 +496,7 @@ exports.importproduct = async (req, res) => {
           if(notsuccessfully > 0){
             errorstr = "<br/><span  style='color:#fa7814 !important'>Total "+notsuccessfully+" Product Not Imported.!</span>";
           }
-          console.log(successfully);
+          
           res.send({
             status : 1,  
             message: "<span style='color:#009600 !important'>Total "+successfully+" Product imported Successfully.!</span>"+errorstr
