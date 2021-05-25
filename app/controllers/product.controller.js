@@ -311,7 +311,7 @@ exports.importproduct = async (req, res) => {
          var error = 0;
          const product={};
          if((typeof row.name !== 'undefined' && row.name)  && (typeof row.description !== 'undefined' && row.description) && (typeof row.price !== 'undefined' && row.price) && (typeof row.stock !== 'undefined' && row.stock)){
-          if(row.name == '' && row.description == '' && row.price == '' && row.stock == '' ){
+          if(row.name == '' && row.description == '' ){
 
           }else{
              if(row.name == ''){
