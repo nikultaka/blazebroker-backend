@@ -14,6 +14,26 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
       mobile: {
         type: DataTypes.STRING
       },
+      first_name :{
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      last_name :{
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      address :{
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      city :{
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      state :{
+        type: DataTypes.STRING,
+        allowNull: true
+      },
       subtotal: {
         type: DataTypes.STRING
       },

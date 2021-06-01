@@ -68,6 +68,11 @@ exports.checkout = async (req, res) => {
     Checkout.create({
       email: req.body.email,
       mobile: req.body.mobile,
+      first_name : req.body.FirstName,
+      last_name : req.body.LastName,
+      address : req.body.StreetAddress,
+      city : req.body.City,
+      state : req.body.StateName,
       subtotal: req.body.subtotal,
       total: req.body.total,
       transaction_id: req.body.transaction_id,
