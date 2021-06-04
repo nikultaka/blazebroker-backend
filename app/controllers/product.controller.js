@@ -509,7 +509,7 @@ exports.importproduct = async (req, res) => {
 
 exports.orderlist = async (req, res) => {
   const user_id = req.userId;
-  var query  = 'select distinct c.id as order_id,c.email as user_email,c.mobile as user_mobile,i.id as item_id,i.qty as qty,i.created_at as order_date,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id where p.seller_id ='+user_id+' ';
+  var query  = 'select distinct c.id as order_id,c.email as user_email,c.mobile as user_mobile,i.id as item_id,i.qty as qty,i.created_at as order_date,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id where p.seller_id ='+user_id+' ORDER BY i.is_confirm ASC';
   
   await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
     res.json({ status : 1 ,data : rows});    
@@ -669,7 +669,7 @@ exports.allorderlist = async (req, res) => {
       data : []
     });
   }
-  var query  = 'select distinct c.id as order_id,c.email as user_email,c.mobile as user_mobile,u.name as seller_name,i.id as item_id,i.qty as qty,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id  left join users as u on u.id = p.seller_id';
+  var query  = 'select distinct c.id as order_id,c.email as user_email,c.mobile as user_mobile,u.name as seller_name,i.id as item_id,i.qty as qty,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id  left join users as u on u.id = p.seller_id ORDER BY i.is_confirm ASC';
   
   await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
     res.json({ status : 1 ,data : rows});    
