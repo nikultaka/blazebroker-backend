@@ -4,7 +4,7 @@ module.exports = app => {
 
   const router = require("express").Router();
 
-
+  router.get("/list", productTypeController.findAllforAdmin); //,[authJwt.verifyToken]
   router.get("/", productTypeController.findAll); //,[authJwt.verifyToken]
   router.post("/",[authJwt.verifyToken], productTypeController.create);
   

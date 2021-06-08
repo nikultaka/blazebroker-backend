@@ -49,6 +49,18 @@ exports.create = (req, res) => {
 exports.findAll = async(req, res) => {
   
   
+  ProductType.findAll({where:{status:1}})
+    .then(data => {
+      res.send({status:1,data:data});
+    })
+    .catch(err => {
+      res.send({status:0,data:[]});
+    });
+  
+};
+exports.findAllforAdmin = async(req, res) => {
+  
+  
   ProductType.findAll()
     .then(data => {
       res.send({status:1,data:data});

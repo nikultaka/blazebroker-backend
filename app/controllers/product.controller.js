@@ -309,48 +309,73 @@ exports.importproduct = async (req, res) => {
          // Create a product
          
          var error = 0;
-         if((typeof row.name !== 'undefined' && row.name) && (typeof row.sativa !== 'undefined' && row.sativa)&& (typeof row.thc !== 'undefined' && row.thc) && (typeof row.description !== 'undefined' && row.description) && (typeof row.price !== 'undefined' && row.price) && (typeof row.stock !== 'undefined' && row.stock)&& (typeof row.product_type !== 'undefined' && row.product_type)){
-          if(row.name == '' && row.sativa == '' && row.thc == '' && row.description == '' && row.price == '' && row.stock == ''&& row.product_type == ''){
+         const product={};
+         if((typeof row.name !== 'undefined' && row.name)  && (typeof row.description !== 'undefined' && row.description)){
+          if(row.name == '' && row.description == '' ){
 
           }else{
              if(row.name == ''){
                error++;
+             }else{
+              product.seller_id = user_id;
+              product.name = row.name;
              }
              if(row.sativa == '' || row.sativa < 0){
-               error++;
+              //row.sativa = '0';
+              product.sativa = 0;
+               //error++;
+             }else{
+              product.sativa = row.sativa;
              }
              if(row.thc == ''){
-               error++;
+              //row.thc = "";
+               //error++;
+             }else{
+              product.thc = row.thc;
              }
              if(row.description == '' || row.description.length > 400){
                error++;
+             }else{
+              product.description = row.description;
              }
              if(row.price == '' || row.price <= 0){
-               error++;
+              product.price = 0;
+              // error++;
+             }else{
+              product.price = row.price;
              }
              if(row.stock == '' || row.stock <= 0){
-               error++;
+              product.stock = 0;
+              product.remaining_stock = 0;
+               //error++;
+             }else{
+              product.stock = row.stock;
+              product.remaining_stock = row.stock;
              }
              if(row.product_type == ''){
-               error++;
+              //row.product_type = ""
+               //error++;
+             }else{
+              product.product_type = row.product_type;
              }
              
              if(error == 0){
                // await getproducttype(row.product_type)
                // .then(async (producttypedetails) => {
                  
-                 const product = {
-                   seller_id : user_id, 
-                   name: row.name,
-                   sativa: row.sativa,
-                   thc: row.thc,
-                   description: row.description,
-                   price: row.price,
-                   stock: row.stock,
-                   remaining_stock: row.stock,
-                   product_type : row.product_type
+                //  const product = {
+                //    seller_id : user_id, 
+                //    name: row.name,
+                //    sativa: row.sativa,
+                //    thc: row.thc,
+                //    description: row.description,
+                //    price: row.price,
+                //    stock: row.stock,
+                //    remaining_stock: row.stock,
+                //    product_type : row.product_type
          
-                 };
+                //  };
+                 
                  finaldata.push(product)
                //   successfully++;
                //   // Save product in database
@@ -377,6 +402,8 @@ exports.importproduct = async (req, res) => {
              }
           }
           
+         }else{
+           console.log(row)
          }
          
         
@@ -386,66 +413,90 @@ exports.importproduct = async (req, res) => {
         var i;
         
         var totaldata = finaldata.length-1;
-        console.log(totaldata);
+        
         for (i = 0; i < finaldata.length; i++) { 
-          await ProductType.findOne({where: { name: { [Op.like]: finaldata[i].product_type }}}).then(async (producttypedetails) => {
-            var producttypedetailsid = '';
-            var product;
-            if(producttypedetails){
-              var producttypedetailsid = producttypedetails.id;
-              product = {
-                seller_id : user_id, 
-                name: finaldata[i].name,
-                sativa: finaldata[i].sativa,
-                thc: finaldata[i].thc,
-                description: finaldata[i].description,
-                price: finaldata[i].price,
-                stock: finaldata[i].stock,
-                remaining_stock: finaldata[i].stock,
-                product_type : producttypedetailsid
-      
-              };
-            }
-              
-              
-              await Product.create(product)
-                  .then(data => {
-                    successfully++;
-                    if(i == totaldata){
-                      
-                      var errorstr = '';
-                      if(notsuccessfully > 0){
-                        errorstr = "<br/><span  style='color:#fa7814 !important'>Total "+notsuccessfully+" Product Not Imported.!</span>";
+          if(finaldata[i].product_type){
+            await ProductType.findOne({where: { name: { [Op.like]: finaldata[i].product_type }}}).then(async (producttypedetails) => {
+              var producttypedetailsid = '';
+              var product;
+              if(producttypedetails){
+                var producttypedetailsid = producttypedetails.id;
+                finaldata[i].product_type = producttypedetailsid;
+                
+              }
+                
+                
+                await Product.create(finaldata[i])
+                    .then(data => {
+                      successfully++;
+                      if(i == totaldata){
+                        
+                        var errorstr = '';
+                        if(notsuccessfully > 0){
+                          errorstr = "<br/><span  style='color:#fa7814 !important'>Total "+notsuccessfully+" Product Not Imported.!</span>";
+                        }
+                        console.log(successfully);
+                        res.send({
+                          status : 1,  
+                          message: "<span style='color:#009600 !important'>Total "+successfully+" Product imported Successfully.!</span>"+errorstr
+                        });
                       }
-                      console.log(successfully);
-                      res.send({
-                        status : 1,  
-                        message: "<span style='color:#009600 !important'>Total "+successfully+" Product imported Successfully.!</span>"+errorstr
-                      });
-                    }
-                  }).catch(err => {
-                    notsuccessfully++;
-                    if(i == totaldata){
-                      
-                      var errorstr = '';
-                      if(notsuccessfully > 0){
-                        errorstr = "<br/><span  style='color:#fa7814 !important'>Total "+notsuccessfully+" Product Not Imported.!</span>";
+                    }).catch(err => {
+                      notsuccessfully++;
+                      if(i == totaldata){
+                        
+                        var errorstr = '';
+                        if(notsuccessfully > 0){
+                          errorstr = "<br/><span  style='color:#fa7814 !important'>Total "+notsuccessfully+" Product Not Imported.!</span>";
+                        }
+                        console.log(successfully);
+                        res.send({
+                          status : 1,  
+                          message: "<span style='color:#009600 !important'>Total "+successfully+" Product imported Successfully.!</span>"+errorstr
+                        });
                       }
-                      console.log(successfully);
-                      res.send({
-                        status : 1,  
-                        message: "<span style='color:#009600 !important'>Total "+successfully+" Product imported Successfully.!</span>"+errorstr
-                      });
-                    }
-              });
-          });
+                });
+            });
+          }else{
+            await Product.create(finaldata[i])
+                    .then(data => {
+                      successfully++;
+                      if(i == totaldata){
+                        
+                        var errorstr = '';
+                        if(notsuccessfully > 0){
+                          errorstr = "<br/><span  style='color:#fa7814 !important'>Total "+notsuccessfully+" Product Not Imported.!</span>";
+                        }
+                        console.log(successfully);
+                        res.send({
+                          status : 1,  
+                          message: "<span style='color:#009600 !important'>Total "+successfully+" Product imported Successfully.!</span>"+errorstr
+                        });
+                      }
+                    }).catch(err => {
+                      notsuccessfully++;
+                      if(i == totaldata){
+                        
+                        var errorstr = '';
+                        if(notsuccessfully > 0){
+                          errorstr = "<br/><span  style='color:#fa7814 !important'>Total "+notsuccessfully+" Product Not Imported.!</span>";
+                        }
+                        console.log(successfully);
+                        res.send({
+                          status : 1,  
+                          message: "<span style='color:#009600 !important'>Total "+successfully+" Product imported Successfully.!</span>"+errorstr
+                        });
+                      }
+                });
+          }
+          
         }
         if(finaldata.length == 0){
           var errorstr = '';
           if(notsuccessfully > 0){
             errorstr = "<br/><span  style='color:#fa7814 !important'>Total "+notsuccessfully+" Product Not Imported.!</span>";
           }
-          console.log(successfully);
+          
           res.send({
             status : 1,  
             message: "<span style='color:#009600 !important'>Total "+successfully+" Product imported Successfully.!</span>"+errorstr
@@ -458,7 +509,7 @@ exports.importproduct = async (req, res) => {
 
 exports.orderlist = async (req, res) => {
   const user_id = req.userId;
-  var query  = 'select distinct c.id as order_id,c.email as user_email,c.mobile as user_mobile,i.id as item_id,i.qty as qty,i.created_at as order_date,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id where p.seller_id ='+user_id+' ';
+  var query  = 'select distinct c.id as order_id,c.email as user_email,c.mobile as user_mobile,i.id as item_id,i.qty as qty,i.created_at as order_date,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id where p.seller_id ='+user_id+' ORDER BY i.is_confirm ASC';
   
   await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
     res.json({ status : 1 ,data : rows});    
@@ -618,7 +669,7 @@ exports.allorderlist = async (req, res) => {
       data : []
     });
   }
-  var query  = 'select distinct c.id as order_id,c.email as user_email,c.mobile as user_mobile,u.name as seller_name,i.id as item_id,i.qty as qty,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id  left join users as u on u.id = p.seller_id';
+  var query  = 'select distinct c.id as order_id,c.email as user_email,c.mobile as user_mobile,u.name as seller_name,i.id as item_id,i.qty as qty,i.is_confirm as is_confirm,p.* from  checkouts  as c inner join  items as i on i.checkout_id = c.id inner join  products as p on i.product_id = p.id  left join users as u on u.id = p.seller_id ORDER BY i.is_confirm ASC';
   
   await sequelize.query(query,{ type: sequelize.QueryTypes.SELECT}).then(function(rows) {
     res.json({ status : 1 ,data : rows});    
