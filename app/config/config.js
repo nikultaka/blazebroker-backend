@@ -1,7 +1,7 @@
 module.exports = {
   NODE_ENV: process.env.NODE_ENV,
   PORT: process.env.PORT,
-  SITE_URL : 'http://192.163.31.3',
+  SITE_URL : process.env.NODE_ENV== 'development' ?'http://localhost:3000' : 'http://192.163.31.3',
   CART_ITEM_TIME :'2',
 
   /** DATABASE */
@@ -9,7 +9,7 @@ module.exports = {
     DB_HOST: process.env.DB_HOST,
     DB_USER: process.env.DB_USER,
     DB_PASS: process.env.DB_PASS,
-    DB_NAME: process.env.DB_NAME,
+    DB_NAME: process.env.DB_NAME, 
     dialect: "mysql",
 
     // pool is optional, it will be used for Sequelize connection pool configuration
